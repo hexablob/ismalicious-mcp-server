@@ -1,0 +1,45 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "com.ismalicious/mcp-server",
+  "title": "isMalicious threat intelligence for AI agents",
+  "description": "Indicator reputation verdicts, CVE lookups (CVSS, EPSS, KEV) and prompt-injection scans for agents",
+  "version": "0.3.0",
+  "websiteUrl": "https://ismalicious.com/prompt-injection-scanner",
+  "packages": [
+    {
+      "registryType": "npm",
+      "registryBaseUrl": "https://registry.npmjs.org",
+      "identifier": "@ismalicious/mcp-server",
+      "version": "0.3.0",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "ISMALICIOUS_API_KEY",
+          "description": "API key from https://ismalicious.com/app/account. Optional: without it the server starts in bootstrap mode and offers bootstrap_key.",
+          "isRequired": false,
+          "isSecret": true
+        },
+        {
+          "name": "ISMALICIOUS_API_SECRET",
+          "description": "API secret paired with the key",
+          "isRequired": false,
+          "isSecret": true
+        },
+        {
+          "name": "ISMALICIOUS_API_BASE",
+          "description": "API base URL (defaults to https://ismalicious.com/api)",
+          "isRequired": false,
+          "isSecret": false
+        },
+        {
+          "name": "ISMALICIOUS_TIMEOUT_MS",
+          "description": "Replaces every tool's timeout, in milliseconds (defaults: gate 15000, check_indicator 25000, CVE 10000, search_indicators 20000, check_indicators 60000)",
+          "isRequired": false,
+          "isSecret": false
+        }
+      ]
+    }
+  ]
+}

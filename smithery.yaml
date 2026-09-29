@@ -1,0 +1,30 @@
+# Smithery registry manifest — https://smithery.ai/docs
+# The gate MCP server is a zero-dependency stdio JSON-RPC server; Smithery
+# hosts discovery, the process still talks to the ismalicious.com API.
+startCommand:
+  type: stdio
+  configSchema:
+    type: object
+    required:
+      - apiKey
+      - apiSecret
+    properties:
+      apiKey:
+        type: string
+        description: API key from https://ismalicious.com/app/account
+      apiSecret:
+        type: string
+        description: API secret paired with the key
+      apiBase:
+        type: string
+        description: API base URL (defaults to https://ismalicious.com/api)
+  commandFunction: |-
+    (config) => ({
+      command: 'node',
+      args: ['dist/index.js'],
+      env: {
+        ISMALICIOUS_API_KEY: config.apiKey,
+        ISMALICIOUS_API_SECRET: config.apiSecret,
+        ...(config.apiBase ? { ISMALICIOUS_API_BASE: config.apiBase } : {}),
+      },
+    })

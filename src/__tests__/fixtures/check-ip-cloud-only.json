@@ -1,0 +1,145 @@
+{
+  "malicious": false,
+  "reputation": null,
+  "apiVersion": "2.0",
+  "enrichmentLevel": "standard",
+  "processingTime": 388,
+  "blocklistHits": 0,
+  "blocklistListed": false,
+  "sources": [
+    {
+      "id": "azure-ip-ranges",
+      "name": "Azure IP Ranges",
+      "type": "ip",
+      "category": "infrastructure",
+      "categories": ["cloud"],
+      "confidenceBase": 85,
+      "matchType": "cidr",
+      "threatClass": "infrastructure",
+      "fpRisk": "low"
+    },
+    {
+      "id": "microsoft-365-endpoints",
+      "name": "Microsoft 365 endpoints",
+      "type": "ip",
+      "category": "infrastructure",
+      "categories": ["saas"],
+      "confidenceBase": 85,
+      "matchType": "cidr",
+      "threatClass": "infrastructure",
+      "fpRisk": "low"
+    }
+  ],
+  "infrastructure": {
+    "attributes": ["cloud", "saas"],
+    "sources": [
+      {
+        "id": "azure-ip-ranges",
+        "name": "Azure IP Ranges",
+        "category": "infrastructure",
+        "threatClass": "infrastructure"
+      },
+      {
+        "id": "microsoft-365-endpoints",
+        "name": "Microsoft 365 endpoints",
+        "category": "infrastructure",
+        "threatClass": "infrastructure"
+      }
+    ]
+  },
+  "riskScore": {
+    "score": 12,
+    "level": "low",
+    "factors": [
+      {
+        "name": "Blocklist presence",
+        "weight": 0.35,
+        "value": 0,
+        "contribution": 0,
+        "description": "Listed by 0 threat sources"
+      },
+      {
+        "name": "Network reputation",
+        "weight": 0.15,
+        "value": 20,
+        "contribution": 3,
+        "description": "Datacenter range (AS8075)"
+      }
+    ],
+    "summary": "Low risk: no threat source lists this IP; it sits in published Microsoft cloud ranges."
+  },
+  "classification": {
+    "primary": "unknown",
+    "secondary": [],
+    "confidence": 0,
+    "indicators": []
+  },
+  "confidence": {
+    "score": 40,
+    "level": "low",
+    "factors": ["No threat listing", "Infrastructure attribution only"]
+  },
+  "geo": {
+    "status": "success",
+    "country": "United States",
+    "countryCode": "US",
+    "region": "VA",
+    "city": "Boydton",
+    "isp": "Microsoft Corporation",
+    "org": "Microsoft Azure Cloud (eastus2)",
+    "as": "AS8075 Microsoft Corporation",
+    "query": "13.107.6.152"
+  },
+  "whois": {
+    "ip": "13.107.6.152",
+    "is_datacenter": true,
+    "is_tor": false,
+    "is_proxy": false,
+    "is_vpn": false,
+    "asn": {
+      "asn": 8075,
+      "name": "Microsoft Corporation",
+      "org": "Microsoft Corporation",
+      "country": "us",
+      "type": "hosting"
+    }
+  },
+  "dataTrust": {
+    "freshness": "fresh",
+    "lastUpdated": "2026-09-17T06:12:41Z",
+    "sourceAgreement": {
+      "level": "none",
+      "totalSources": 0,
+      "agreeingSources": 0
+    },
+    "sources": [
+      {
+        "name": "Azure IP Ranges",
+        "reliability": 0.4,
+        "reliabilityLevel": "medium",
+        "noiseProfile": "contextual",
+        "threatClass": "infrastructure"
+      },
+      {
+        "name": "Microsoft 365 endpoints",
+        "reliability": 0.4,
+        "reliabilityLevel": "medium",
+        "noiseProfile": "contextual",
+        "threatClass": "infrastructure"
+      }
+    ]
+  },
+  "evidence": {
+    "verdict": "clean",
+    "recommendedAction": "monitor",
+    "reasons": [
+      "No threat source lists this IP",
+      "Published Microsoft cloud range (Azure, Microsoft 365)"
+    ],
+    "contradictions": []
+  },
+  "relatedInfrastructure": {
+    "totalRelated": 0,
+    "sharedHosting": false
+  }
+}

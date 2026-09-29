@@ -1,0 +1,72 @@
+{
+  "name": "@ismalicious/mcp-server",
+  "version": "0.3.0",
+  "description": "MCP server for isMalicious threat intelligence \u2014 indicator reputation verdicts, CVE lookups (CVSS, EPSS, KEV) and the isinjected prompt-injection gate for AI agents",
+  "mcpName": "com.ismalicious/mcp-server",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "threat-intelligence",
+    "ip-reputation",
+    "domain-reputation",
+    "cve",
+    "epss",
+    "kev",
+    "prompt-injection",
+    "ai-security",
+    "agent-security",
+    "ismalicious",
+    "isinjected"
+  ],
+  "homepage": "https://ismalicious.com/mcp",
+  "bugs": {
+    "url": "https://github.com/hexablob/ismalicious-mcp-server/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hexablob/ismalicious-mcp-server.git"
+  },
+  "license": "MIT",
+  "author": "isMalicious",
+  "type": "module",
+  "bin": {
+    "ismalicious-mcp": "dist/index.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/server.d.ts",
+      "import": "./dist/server.js"
+    }
+  },
+  "types": "./dist/server.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "prepublishOnly": "node scripts/check-version.mjs && npm run test && npm run build",
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "check-version": "node scripts/check-version.mjs",
+    "smoke": "node scripts/smoke.mjs",
+    "validate-server-json": "node scripts/validate-server-json.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "tsup": "^8.0.0",
+    "typescript": "^5.9.3",
+    "vitest": "^2.0.0"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "sideEffects": false
+}

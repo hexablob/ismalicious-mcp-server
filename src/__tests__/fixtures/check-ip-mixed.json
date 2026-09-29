@@ -1,0 +1,151 @@
+{
+  "malicious": false,
+  "reputation": null,
+  "apiVersion": "2.0",
+  "enrichmentLevel": "standard",
+  "processingTime": 402,
+  "blocklistHits": 1,
+  "blocklistListed": true,
+  "sources": [
+    {
+      "id": "greensnow-blocklist",
+      "name": "GreenSnow - Attackers",
+      "type": "ip",
+      "category": "attack",
+      "categories": ["bruteforce", "scanner"],
+      "confidenceBase": 75,
+      "retentionDays": 7,
+      "threatClass": "threat",
+      "fpRisk": "low"
+    },
+    {
+      "id": "azure-ip-ranges",
+      "name": "Azure IP Ranges",
+      "type": "ip",
+      "category": "infrastructure",
+      "categories": ["cloud"],
+      "confidenceBase": 85,
+      "matchType": "cidr",
+      "threatClass": "infrastructure",
+      "fpRisk": "low"
+    }
+  ],
+  "infrastructure": {
+    "attributes": ["cloud"],
+    "sources": [
+      {
+        "id": "azure-ip-ranges",
+        "name": "Azure IP Ranges",
+        "category": "infrastructure",
+        "threatClass": "infrastructure"
+      }
+    ]
+  },
+  "riskScore": {
+    "score": 72,
+    "level": "high",
+    "factors": [
+      {
+        "name": "Blocklist presence",
+        "weight": 0.35,
+        "value": 75,
+        "contribution": 26,
+        "description": "Listed by 1 threat source (GreenSnow - Attackers)"
+      },
+      {
+        "name": "Network reputation",
+        "weight": 0.15,
+        "value": 20,
+        "contribution": 3,
+        "description": "Datacenter range (AS8075)"
+      }
+    ],
+    "summary": "High risk: an active attacker feed lists this IP; the cloud range it sits in is not a mitigating factor."
+  },
+  "classification": {
+    "primary": "bruteforce",
+    "secondary": ["scanner"],
+    "confidence": 60,
+    "indicators": [
+      {
+        "type": "source",
+        "category": "bruteforce",
+        "description": "GreenSnow - Attackers: attack",
+        "weight": 0.4
+      }
+    ]
+  },
+  "confidence": {
+    "score": 62,
+    "level": "medium",
+    "factors": ["One threat listing", "Rotating honeypot feed"]
+  },
+  "timeline": {
+    "firstSeen": "2026-09-15T21:04:00Z",
+    "lastSeen": "2026-09-17T05:40:00Z",
+    "trend": "active",
+    "totalDetections": 1
+  },
+  "geo": {
+    "status": "success",
+    "country": "United States",
+    "countryCode": "US",
+    "region": "VA",
+    "city": "Boydton",
+    "isp": "Microsoft Corporation",
+    "org": "Microsoft Azure Cloud (eastus2)",
+    "as": "AS8075 Microsoft Corporation",
+    "query": "20.55.12.9"
+  },
+  "whois": {
+    "ip": "20.55.12.9",
+    "is_datacenter": true,
+    "is_tor": false,
+    "is_proxy": false,
+    "is_vpn": false,
+    "asn": {
+      "asn": 8075,
+      "name": "Microsoft Corporation",
+      "org": "Microsoft Corporation",
+      "country": "us",
+      "type": "hosting"
+    }
+  },
+  "dataTrust": {
+    "freshness": "fresh",
+    "lastUpdated": "2026-09-17T05:40:00Z",
+    "sourceAgreement": {
+      "level": "weak",
+      "totalSources": 1,
+      "agreeingSources": 1
+    },
+    "sources": [
+      {
+        "name": "GreenSnow - Attackers",
+        "reliability": 0.75,
+        "reliabilityLevel": "high",
+        "noiseProfile": "contextual",
+        "threatClass": "threat"
+      },
+      {
+        "name": "Azure IP Ranges",
+        "reliability": 0.4,
+        "reliabilityLevel": "medium",
+        "noiseProfile": "contextual",
+        "threatClass": "infrastructure"
+      }
+    ]
+  },
+  "evidence": {
+    "verdict": "malicious",
+    "recommendedAction": "block",
+    "reasons": ["Listed by GreenSnow - Attackers (attack) in the last 48h"],
+    "contradictions": [
+      "Published Microsoft cloud range: a compromised or short-lived tenant VM, not Microsoft itself"
+    ]
+  },
+  "relatedInfrastructure": {
+    "totalRelated": 0,
+    "sharedHosting": false
+  }
+}
