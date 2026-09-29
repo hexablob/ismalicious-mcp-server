@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-09-29
+
+The source is public: <https://github.com/hexablob/ismalicious-mcp-server>
+mirrors this package. Until now `repository` named the private monorepo, which
+answers 404 outside it.
+
+### Added
+
+- `LICENSE` (MIT) ships in the tarball. `repository` and `bugs` in
+  `package.json`, and `repository` in the MCP registry entry, point at the
+  public repository.
+- `glama.json` (maintainer) and a `Dockerfile` that builds the package and
+  runs the stdio server, which Glama needs to list it. The image sets a
+  placeholder key pair, so `tools/list` returns the seven keyed tools instead
+  of `bootstrap_key` alone. Listing makes no network call; a real pair passed
+  with `-e` replaces the placeholder, and empty values restore bootstrap mode.
+
+### Changed
+
+- `search_indicators`: the default API now answers with the domains the corpus
+  lists that look like the keyword — typosquats, homoglyphs, the name on other
+  TLDs or hosting platforms, phishing-word combinations — most dangerous
+  first, up to 500. The 25-per-label index search it replaces had failed on
+  every call since the index was lost (2026-09-23). Tool and `keywords`
+  descriptions say so; the projection is unchanged.
+
+### Fixed
+
 - `check_indicator`: a hash NSRL knows (`flags.knownGood`) that a threat source
   also lists is no longer `malicious` / `block`. `/check` keeps
   `malicious: true` for the listing and adds `knownGood` for NSRL; the ladder
@@ -15,12 +43,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   headline that names the conflict; `blocklist` still lists the citing
   sources. `check_indicators` is unchanged: its rows come from `/bulk/check`,
   which carries no NSRL flag, and relay the API's `recommendedAction`.
-- `search_indicators`: the default API now answers with the domains the corpus
-  lists that look like the keyword — typosquats, homoglyphs, the name on other
-  TLDs or hosting platforms, phishing-word combinations — most dangerous
-  first, up to 500. The 25-per-label index search it replaces had failed on
-  every call since the index was lost (2026-09-23). Tool and `keywords`
-  descriptions say so; the projection is unchanged.
 
 ## [0.3.0] - 2026-09-21
 

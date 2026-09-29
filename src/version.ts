@@ -5,5 +5,5 @@
  * must all agree with this constant; `scripts/check-version.mjs` and
  * `src/__tests__/version.test.ts` fail when they do not. Bump here first.
  */
-export const SERVER_VERSION = "0.3.0";
+export const SERVER_VERSION = "0.3.1";
 export const SERVER_NAME = "@ismalicious/mcp-server";

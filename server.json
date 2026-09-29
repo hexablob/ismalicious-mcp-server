@@ -3,14 +3,14 @@
   "name": "com.ismalicious/mcp-server",
   "title": "isMalicious threat intelligence for AI agents",
   "description": "Indicator reputation verdicts, CVE lookups (CVSS, EPSS, KEV) and prompt-injection scans for agents",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "websiteUrl": "https://ismalicious.com/prompt-injection-scanner",
   "packages": [
     {
       "registryType": "npm",
       "registryBaseUrl": "https://registry.npmjs.org",
       "identifier": "@ismalicious/mcp-server",
-      "version": "0.3.0",
+      "version": "0.3.1",
       "transport": {
         "type": "stdio"
       },
@@ -41,5 +41,9 @@
         }
       ]
     }
-  ]
+  ],
+  "repository": {
+    "url": "https://github.com/hexablob/ismalicious-mcp-server",
+    "source": "github"
+  }
 }

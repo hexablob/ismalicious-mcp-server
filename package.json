@@ -1,6 +1,6 @@
 {
   "name": "@ismalicious/mcp-server",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "MCP server for isMalicious threat intelligence \u2014 indicator reputation verdicts, CVE lookups (CVSS, EPSS, KEV) and the isinjected prompt-injection gate for AI agents",
   "mcpName": "com.ismalicious/mcp-server",
   "keywords": [
@@ -42,7 +42,8 @@
   "files": [
     "dist",
     "README.md",
-    "CHANGELOG.md"
+    "CHANGELOG.md",
+    "LICENSE"
   ],
   "scripts": {
     "prepublishOnly": "node scripts/check-version.mjs && npm run test && npm run build",

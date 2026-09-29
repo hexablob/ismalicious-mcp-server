@@ -201,3 +201,8 @@ node scripts/smoke.mjs           # stdio end-to-end against a stub API
 The version is declared once in `src/version.ts`; `CHANGELOG.md` lists what changed.
 This repository mirrors `packages/mcp-server` from the isMalicious monorepo, where
 releases to npm and the MCP registry are cut. Issues and pull requests are welcome here.
+
+The `Dockerfile` is the build Glama runs to list the server. It sets a
+placeholder key pair so `tools/list` shows every tool; pass a real pair with
+`docker run -i -e ISMALICIOUS_API_KEY=… -e ISMALICIOUS_API_SECRET=…`, or empty
+values for bootstrap mode.
