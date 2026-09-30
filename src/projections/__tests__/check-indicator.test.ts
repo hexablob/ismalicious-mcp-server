@@ -111,6 +111,36 @@ describe("projectCheckIndicator", () => {
     );
   });
 
+  it("surfaces a breached-password match beside an unknown file verdict", () => {
+    const ntlm = "8846f7eaee8fb117ad06bdd830b7586c";
+    const p = projectCheckIndicator(ntlm, {
+      malicious: false,
+      lookupStatus: "unknown",
+      sources: [],
+      pwnedPassword: {
+        found: true,
+        hashType: "ntlm",
+        count: 52372427,
+        source: "Have I Been Pwned — Pwned Passwords",
+      },
+    });
+    expect(p.verdict).toBe("unknown");
+    expect(p.pwnedPassword).toEqual({ hashType: "ntlm", count: 52372427 });
+    expect(p.headline).toMatch(
+      /It is also the NTLM hash of a password seen 52,372,427 times in data breaches\.$/,
+    );
+  });
+
+  it("leaves pwnedPassword out when the API sent none", () => {
+    const p = projectCheckIndicator("e".repeat(40), {
+      malicious: false,
+      lookupStatus: "unknown",
+      sources: [],
+    });
+    expect(p).not.toHaveProperty("pwnedPassword");
+    expect(p.headline).not.toMatch(/password/);
+  });
+
   it("keeps blocking a listed hash NSRL does not know", () => {
     const sha = "c".repeat(64);
     const p = projectCheckIndicator(sha, {

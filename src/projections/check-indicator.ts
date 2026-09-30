@@ -71,6 +71,11 @@ export interface CheckIndicatorProjection {
     truncated?: boolean;
   };
   infrastructure?: InfrastructureAttribution;
+  /**
+   * Hash queries: the digest is the SHA-1 (40 hex) or NTLM (32 hex) of a
+   * breached password. Beside the file verdict, never part of it.
+   */
+  pwnedPassword?: { hashType: string; count: number };
   timeline?: {
     firstSeen?: string;
     lastSeen?: string;
@@ -549,6 +554,15 @@ export function projectCheckIndicator(
       : {}),
   });
 
+  const pwned = rec(raw.pwnedPassword);
+  const pwnedPassword =
+    pwned && bool(pwned.found) && num(pwned.count) !== undefined
+      ? { hashType: str(pwned.hashType) ?? "sha1", count: num(pwned.count)! }
+      : undefined;
+  const fullHeadline = pwnedPassword
+    ? `${headline} It is also the ${pwnedPassword.hashType === "ntlm" ? "NTLM" : "SHA-1"} hash of a password seen ${pwnedPassword.count.toLocaleString("en-US")} times in data breaches.`
+    : headline;
+
   const dataTrust = rec(raw.dataTrust);
   const vulnerabilities = projectVulnerabilities(raw);
   const domain = type === "domain" || type === "url" ? projectDomain(raw) : {};
@@ -558,7 +572,7 @@ export function projectCheckIndicator(
     indicator,
     type,
     verdict,
-    headline,
+    headline: fullHeadline,
     recommendedAction: ACTION[verdict],
     malicious: verdict === "malicious",
     ...(Object.keys(risk).length ? { risk } : {}),
@@ -596,6 +610,7 @@ export function projectCheckIndicator(
       ...(threats.length > maxSources ? { truncated: true } : {}),
     },
     ...(infrastructure ? { infrastructure } : {}),
+    ...(pwnedPassword ? { pwnedPassword } : {}),
     ...(Object.keys(timeline).length ? { timeline } : {}),
     ...(Object.keys(network).length ? { network } : {}),
     ...(Object.keys(domain).length ? { domain } : {}),

@@ -43,6 +43,7 @@ export const INSTRUCTIONS = [
   "Use check_indicator to enrich an IP, domain, URL or hash: it returns a verdict, a headline you can relay verbatim and a recommendedAction (block/review/allow/unverified). Its infrastructure block (cloud, cdn, tor-exit, vpn…) describes what the entity is, not a verdict.",
   "get_cve is the only CVE lookup path (recent_cves lists the latest); do not guess other routes.",
   "search_indicators finds lookalike and typosquat indicators around a keyword (no verdicts). check_indicators triages up to 100 indicators in one call and charges one request per indicator; prefer check_indicator for a single one.",
+  "check_password_exposure says whether a password (hashed locally, never sent) or its SHA-1/NTLM hash is in known breach dumps; only a 5-character hash prefix leaves the machine.",
   "When a result has isError with quota.retry_after or quota.resets_at, wait for it instead of retrying; a 401 means the key is missing or revoked.",
 ].join("\n");
 

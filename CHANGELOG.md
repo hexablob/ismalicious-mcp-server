@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-09-30
+
+### Added
+
+- `check_password_exposure`: whether a password, or its SHA-1 or NTLM hash,
+  is in Have I Been Pwned's Pwned Passwords corpus, and how many times. A
+  plaintext password is hashed on the caller's machine; only the first five
+  hex digits of the hash are sent (`GET /pwned-passwords/range/{prefix}`),
+  and the match is made locally. One request of the monthly quota.
+- `check_indicator` on a 40-hex (SHA-1) or 32-hex (NTLM) value now carries
+  `pwnedPassword: { hashType, count }` when the value is the hash of a
+  breached password, and its headline says so. The file verdict is unchanged.
+
 ## [0.3.1] - 2026-09-29
 
 The source is public: <https://github.com/hexablob/ismalicious-mcp-server>

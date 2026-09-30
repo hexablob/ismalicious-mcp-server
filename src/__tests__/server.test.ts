@@ -107,6 +107,7 @@ describe("tools/list", () => {
       "recent_cves",
       "search_indicators",
       "check_indicators",
+      "check_password_exposure",
     ]);
   });
 
@@ -680,7 +681,7 @@ describe("bootstrap_key", () => {
       id: 2,
       method: "tools/list",
     });
-    expect((list?.result as { tools: unknown[] }).tools).toHaveLength(7);
+    expect((list?.result as { tools: unknown[] }).tools).toHaveLength(8);
   });
 
   it("explains the one-per-IP-per-day limit on 429", async () => {
@@ -754,5 +755,108 @@ describe("quota resource", () => {
       params: { uri: "x://y" },
     });
     expect(res?.error?.code).toBe(-32002);
+  });
+});
+
+describe("check_password_exposure", () => {
+  /** SHA-1("password") and NTLM("password"), uppercase. */
+  const SHA1 = "5BAA61E4C9B93F3F0682250B6CF8331B7EE68FD8";
+  const NTLM = "8846F7EAEE8FB117AD06BDD830B7586C";
+  const range = (entries: Array<{ suffix: string; count: number }>) =>
+    response(200, {
+      prefix: "5BAA6",
+      mode: "sha1",
+      suffixLength: 12,
+      entries,
+      source: "Have I Been Pwned — Pwned Passwords",
+      corpusUpdatedAt: "2026-09-30T18:00:00+00:00",
+    });
+
+  it("hashes a password locally and sends only the 5-digit prefix", async () => {
+    const http = stubHttp({
+      get: vi.fn(async () =>
+        range([
+          { suffix: "000000000001", count: 2 },
+          { suffix: SHA1.slice(5, 17), count: 10434004 },
+        ]),
+      ),
+    });
+    const res = await make(http).handle(
+      call("check_password_exposure", { password: "password" }),
+    );
+    expect(http.get).toHaveBeenCalledWith(
+      "/pwned-passwords/range/5BAA6?mode=sha1",
+      expect.objectContaining({ timeoutMs: 10_000 }),
+    );
+    const sent = JSON.stringify(vi.mocked(http.get).mock.calls);
+    expect(sent).not.toContain('password"');
+    expect(sent).not.toContain(SHA1.slice(5));
+    expect(isError(res)).toBe(false);
+    expect(parsed(res)).toMatchObject({
+      exposed: true,
+      count: 10434004,
+      hashType: "sha1",
+      corpusUpdatedAt: "2026-09-30T18:00:00+00:00",
+    });
+    expect(text(res)).not.toContain(SHA1);
+  });
+
+  it("looks an NTLM hash up in ntlm mode, case-insensitively", async () => {
+    const http = stubHttp({
+      get: vi.fn(async () =>
+        range([{ suffix: NTLM.slice(5, 17).toLowerCase(), count: 7 }]),
+      ),
+    });
+    const res = await make(http).handle(
+      call("check_password_exposure", { ntlm: NTLM.toLowerCase() }),
+    );
+    expect(http.get).toHaveBeenCalledWith(
+      "/pwned-passwords/range/8846F?mode=ntlm",
+      expect.anything(),
+    );
+    expect(parsed(res)).toMatchObject({
+      exposed: true,
+      count: 7,
+      hashType: "ntlm",
+    });
+  });
+
+  it("reports a hash absent from its range as not exposed", async () => {
+    const http = stubHttp({
+      get: vi.fn(async () => range([{ suffix: "000000000001", count: 2 }])),
+    });
+    const res = await make(http).handle(
+      call("check_password_exposure", { sha1: SHA1 }),
+    );
+    expect(parsed(res)).toMatchObject({ exposed: false, count: 0 });
+  });
+
+  it.each([
+    [{}],
+    [{ password: "a", sha1: SHA1 }],
+    [{ sha1: "abc" }],
+    [{ ntlm: SHA1 }],
+    [{ sha1: "Z".repeat(40) }],
+  ])("refuses %j without calling the API", async (args) => {
+    const http = stubHttp();
+    const res = await make(http).handle(call("check_password_exposure", args));
+    expect(isError(res)).toBe(true);
+    expect(http.get).not.toHaveBeenCalled();
+  });
+
+  it("relays an unavailable corpus as a tool error", async () => {
+    const http = stubHttp({
+      get: vi.fn(async () =>
+        response(503, {
+          error: "Service unavailable",
+          message:
+            "The Pwned Passwords corpus is not loaded on this server yet.",
+        }),
+      ),
+    });
+    const res = await make(http).handle(
+      call("check_password_exposure", { sha1: SHA1 }),
+    );
+    expect(isError(res)).toBe(true);
   });
 });

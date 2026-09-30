@@ -133,6 +133,7 @@ try {
     "recent_cves",
     "search_indicators",
     "check_indicators",
+    "check_password_exposure",
   ]) {
     if (!names.includes(n)) fail(`tools/list missing ${n}: ${names.join(",")}`);
   }

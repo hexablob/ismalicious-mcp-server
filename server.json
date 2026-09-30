@@ -3,14 +3,14 @@
   "name": "com.ismalicious/mcp-server",
   "title": "isMalicious threat intelligence for AI agents",
   "description": "Indicator reputation verdicts, CVE lookups (CVSS, EPSS, KEV) and prompt-injection scans for agents",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "websiteUrl": "https://ismalicious.com/prompt-injection-scanner",
   "packages": [
     {
       "registryType": "npm",
       "registryBaseUrl": "https://registry.npmjs.org",
       "identifier": "@ismalicious/mcp-server",
-      "version": "0.3.1",
+      "version": "0.4.0",
       "transport": {
         "type": "stdio"
       },
@@ -35,7 +35,7 @@
         },
         {
           "name": "ISMALICIOUS_TIMEOUT_MS",
-          "description": "Replaces every tool's timeout, in milliseconds (defaults: gate 15000, check_indicator 25000, CVE 10000, search_indicators 20000, check_indicators 60000)",
+          "description": "Replaces every tool's timeout, in milliseconds (defaults: gate 15000, check_indicator 25000, CVE 10000, search_indicators 20000, check_indicators 60000, check_password_exposure 10000)",
           "isRequired": false,
           "isSecret": false
         }
