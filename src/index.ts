@@ -5,10 +5,18 @@
  * stdout, and logs to stderr (stdout is the protocol channel and must stay
  * clean). Configuration comes from the environment:
  *
- *   ISMALICIOUS_API_KEY     — your organization API key
- *   ISMALICIOUS_API_SECRET  — your organization API secret
- *   ISMALICIOUS_API_BASE    — optional, defaults to https://ismalicious.com/api
- *   ISMALICIOUS_TIMEOUT_MS  — optional, replaces every tool's timeout
+ *   ISMALICIOUS_API_KEY           — your organization API key
+ *   ISMALICIOUS_API_SECRET        — your organization API secret
+ *   ISMALICIOUS_API_BASE          — optional, defaults to https://ismalicious.com/api
+ *   ISMALICIOUS_WEB_BASE          — optional, base for bootstrap_key (a Next.js-only
+ *                                   route); defaults to ISMALICIOUS_API_BASE unless
+ *                                   that is the Rust host, else https://ismalicious.com/api
+ *   ISMALICIOUS_TIMEOUT_MS        — optional, replaces every tool's timeout
+ *   ISMALICIOUS_TIMEOUT_<TOOL>_MS — optional, one tool's timeout; wins over the above
+ *   ISMALICIOUS_CACHE_TTL_S       — optional, 0 turns the result cache off, N caps TTLs
+ *   ISMALICIOUS_PREWARM           — optional, 0 skips the connection warm-up
+ *
+ * The parsing rules live in `config.ts`.
  *
  * Without a key pair the server still starts, in a reduced mode where only
  * `bootstrap_key` is offered; it mints a free key from an email address and
@@ -16,7 +24,15 @@
  */
 
 import { createInterface } from "node:readline";
+import {
+  resolveBases,
+  resolveCache,
+  resolvePrewarm,
+  resolveTimeoutOverride,
+  resolveToolTimeouts,
+} from "./config.js";
 import { createServer, type JsonRpcRequest } from "./server.js";
+import { MCP_TOOLS } from "./tools/index.js";
 
 const LOG_PREFIX = "ismalicious-mcp";
 
@@ -37,28 +53,21 @@ function resolveApiKeyHeader(): string | null {
   return Buffer.from(`${key}:${secret}`).toString("base64");
 }
 
-function resolveTimeoutOverride(): number | undefined {
-  const raw = process.env.ISMALICIOUS_TIMEOUT_MS;
-  if (!raw) return undefined;
-  const n = Number(raw);
-  if (!Number.isFinite(n) || n <= 0) {
-    log(`ignoring ISMALICIOUS_TIMEOUT_MS=${raw} (not a positive number)`);
-    return undefined;
-  }
-  return n;
-}
-
 function write(message: unknown): void {
   process.stdout.write(`${JSON.stringify(message)}\n`);
 }
 
 function main(): void {
-  const baseUrl =
-    process.env.ISMALICIOUS_API_BASE ?? "https://ismalicious.com/api";
+  const env = process.env;
+  const { apiBase, webBase } = resolveBases(env);
   const server = createServer({
-    baseUrl,
+    baseUrl: apiBase,
+    webBaseUrl: webBase,
     apiKeyHeader: resolveApiKeyHeader(),
-    timeoutOverrideMs: resolveTimeoutOverride(),
+    timeoutOverrideMs: resolveTimeoutOverride(env, log),
+    toolTimeoutsMs: resolveToolTimeouts(env, MCP_TOOLS, log),
+    cache: resolveCache(env, log),
+    prewarm: resolvePrewarm(env),
     notify: write,
   });
 

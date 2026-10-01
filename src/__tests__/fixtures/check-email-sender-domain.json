@@ -1,0 +1,95 @@
+{
+  "apiVersion": "v2",
+  "type": "email",
+  "entity": "ceo@evil.example",
+  "enrichmentLevel": "fast",
+  "processingTime": 2,
+  "lookupStatus": "unknown",
+  "verdict": "malicious",
+  "malicious": true,
+  "recommendedAction": "block",
+  "reasons": [
+    "Sender domain evil.example is malicious: 2 threat listings, risk 50/100, medium"
+  ],
+  "blocklistHits": 0,
+  "blocklistListed": false,
+  "categories": [],
+  "riskScore": {
+    "score": 75,
+    "level": "high",
+    "factors": [],
+    "summary": "ceo@evil.example sends from the malicious domain evil.example"
+  },
+  "firstSeen": null,
+  "lastSeen": null,
+  "lastUpdated": null,
+  "sources": [],
+  "email": {
+    "address": "ceo@evil.example",
+    "localPart": "ceo",
+    "domain": "evil.example",
+    "disposable": false,
+    "freeProvider": false,
+    "mx": null,
+    "domainReputation": {
+      "lookupStatus": "found",
+      "malicious": true,
+      "blocklistHits": 2,
+      "sources": [
+        "OpenPhish - Community Feed",
+        "PhishTank - Online Valid"
+      ],
+      "infrastructure": []
+    }
+  },
+  "dataTrust": {
+    "observedAt": "2026-09-30T12:00:00+00:00",
+    "lastUpdated": null,
+    "firstSeen": null,
+    "lastSeen": null,
+    "dataAgeHours": null,
+    "freshness": "unknown",
+    "sourceAgreement": {
+      "count": 0,
+      "weightedStrength": -0.0,
+      "level": "none",
+      "scannerDetections": 0,
+      "scannerSuspicious": 0,
+      "scannerClean": 0
+    },
+    "sources": [],
+    "completeness": {
+      "score": 0,
+      "present": [],
+      "missing": [
+        "sources"
+      ],
+      "facetFreshness": {}
+    },
+    "providerAgreement": {
+      "status": "unknown",
+      "summary": "No cross-provider correlation signals available",
+      "contradictorySignals": []
+    }
+  },
+  "evidence": {
+    "verdict": "high",
+    "score": 75,
+    "confidence": null,
+    "observedAt": "2026-09-30T12:00:00+00:00",
+    "reasons": [
+      "Sender domain evil.example is malicious: 2 threat listings, risk 50/100, medium"
+    ],
+    "contradictorySignals": [],
+    "sourceSummary": {
+      "count": 0,
+      "weightedStrength": -0.0,
+      "highReliabilityCount": 0,
+      "noiseWarnings": []
+    },
+    "freshness": "unknown",
+    "dataAgeHours": null,
+    "recommendedAction": "block",
+    "analystStatus": "new"
+  }
+}

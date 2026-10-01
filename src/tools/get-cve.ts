@@ -5,10 +5,11 @@ import {
   projectCve,
 } from "../projections/cve.js";
 import { fetchJson } from "./request.js";
-import { fail, ok, type ToolDefinition } from "./types.js";
+import { fail, ok, READ_ONLY_TOOL, type ToolDefinition } from "./types.js";
 
 export const getCve: ToolDefinition = {
   name: "get_cve",
+  title: "Look up a CVE",
   description:
     "One CVE by id: description, CVSS, EPSS probability, CISA KEV status and due date, exploitation evidence (SSVC, weaponized, zero-day, Exploit-DB, Nuclei), publication dates and references. This is the only CVE lookup path; do not guess other routes. Costs one request of the monthly quota.",
   inputSchema: {
@@ -23,8 +24,12 @@ export const getCve: ToolDefinition = {
     required: ["id"],
     additionalProperties: false,
   },
+  annotations: READ_ONLY_TOOL,
   requiresKey: true,
   timeoutMs: 10_000,
+  // A CVE record changes a few times a day at most (EPSS daily, KEV rarely).
+  cacheTtlSec: 3600,
+  cacheArgs: (args) => ({ id: normalizeCveId(args.id) }),
   async call(args, ctx) {
     const id = normalizeCveId(args.id);
     if (!id) {

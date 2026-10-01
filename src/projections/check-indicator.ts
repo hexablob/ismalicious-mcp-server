@@ -14,6 +14,7 @@
  * without the LLM: deterministic, and relayable into Slack as-is.
  */
 
+import { classifyIndicator } from "../indicators.js";
 import {
   arr,
   bool,
@@ -28,7 +29,8 @@ import {
   type Rec,
 } from "./fields.js";
 
-export type IndicatorType = "ip" | "domain" | "url" | "hash";
+export type IndicatorType =
+  "ip" | "domain" | "url" | "hash" | "email" | "phone";
 export type Verdict = "malicious" | "suspicious" | "clean" | "unknown";
 export type RecommendedAction = "block" | "review" | "allow" | "unverified";
 
@@ -43,14 +45,43 @@ export interface InfrastructureAttribution {
   truncated?: boolean;
 }
 
+/**
+ * What the file is, for a hash the dataset knows (MalwareBazaar enrichment,
+ * ThreatFox): enough for an agent to name it in a ticket. Never OTX pulse
+ * content, whose licence is undecided.
+ */
+export interface FileFacts {
+  family?: string;
+  /** Every family named, when there is more than one. */
+  families?: string[];
+  fileType?: string;
+  mimeType?: string;
+  fileName?: string;
+  sizeBytes?: number;
+  /** The detection signature, when it is not the family already given. */
+  signature?: string;
+  tags?: string[];
+  /** The file's other digests, to pivot to another tool or feed. */
+  digests?: { md5?: string; sha1?: string; sha256?: string };
+}
+
 export interface CheckIndicatorProjection {
+  /** The value looked up: the input refanged (`evil[.]com` → `evil.com`). */
   indicator: string;
+  /** The input as given, when refanging changed it. */
+  input?: string;
   type: IndicatorType;
   verdict: Verdict;
   headline: string;
   recommendedAction: RecommendedAction;
   malicious: boolean;
+  /** `known` / `unknown` for a hash: whether any source has seen it. */
+  lookupStatus?: string;
   risk?: { score?: number; level?: string; summary?: string };
+  /** The API's own top evidence sentences, at most three. */
+  reasons?: string[];
+  categories?: string[];
+  file?: FileFacts;
   confidence?: { score?: number; level?: string };
   classification?: {
     primary?: string;
@@ -67,7 +98,8 @@ export interface CheckIndicatorProjection {
   blocklist: {
     hits: number;
     listed: boolean;
-    sources: Array<{ name: string; category?: string }>;
+    /** `via`: `alias` (listed under another digest of the same file) or `cidr` (through a listed range). */
+    sources: Array<{ name: string; category?: string; via?: string }>;
     truncated?: boolean;
   };
   infrastructure?: InfrastructureAttribution;
@@ -103,32 +135,43 @@ export interface CheckIndicatorProjection {
     relatedInfrastructure: boolean;
   };
   reportUrl: string;
-  meta?: { enrichment?: string; processingMs?: number; dataTrust?: string };
+  meta?: {
+    enrichment?: string;
+    processingMs?: number;
+    dataTrust?: string;
+    /**
+     * Facets the `fast` level found no cached value for (`dns`, `whois`,
+     * `circl`…); the API is completing them, so one re-check after a few
+     * seconds can be fuller.
+     */
+    pending?: string[];
+  };
 }
 
-const IPV4 = /^(\d{1,3})(\.\d{1,3}){3}$/;
-const IPV6 = /^[0-9a-f:]+$/i;
-const HASH = /^[0-9a-f]{32}$|^[0-9a-f]{40}$|^[0-9a-f]{64}$/i;
+const INDICATOR_TYPES: ReadonlySet<string> = new Set([
+  "ip",
+  "domain",
+  "url",
+  "hash",
+  "email",
+  "phone",
+]);
 
+/**
+ * The API's declared `type` when it sends one, else the local typing of the
+ * indicator (`indicators.ts`), which the tools already ran before the call.
+ */
 export function detectIndicatorType(
   indicator: string,
   raw: Rec,
 ): IndicatorType {
   const declared = str(raw.type);
-  if (
-    declared === "ip" ||
-    declared === "domain" ||
-    declared === "url" ||
-    declared === "hash"
-  ) {
-    return declared;
-  }
-  if (isRec(raw.hashInfo) || HASH.test(indicator)) return "hash";
-  if (IPV4.test(indicator) || (indicator.includes(":") && IPV6.test(indicator)))
-    return "ip";
-  if (/^[a-z][a-z0-9+.-]*:\/\//i.test(indicator) || indicator.includes("/"))
-    return "url";
-  return "domain";
+  if (declared && INDICATOR_TYPES.has(declared))
+    return declared as IndicatorType;
+  if (isRec(raw.hashInfo)) return "hash";
+  const local = classifyIndicator(indicator);
+  if (local.ok) return local.kind;
+  return local.looksLike ?? "domain";
 }
 
 /**
@@ -204,16 +247,19 @@ const ACTION: Record<Verdict, RecommendedAction> = {
   unknown: "unverified",
 };
 
-interface SourceEntry {
+export interface SourceEntry {
   name: string;
   category?: string;
+  via?: string;
 }
 
-interface InfrastructureEntry extends SourceEntry {
+interface InfrastructureEntry {
+  name: string;
+  category?: string;
   threatClass: string;
 }
 
-interface ProjectedSources {
+export interface ProjectedSources {
   /** Threat listings, in document order. */
   threats: SourceEntry[];
   /** Threat listings counted before the name filter, so `hits` matches the document. */
@@ -226,7 +272,15 @@ function sourceCategory(s: Rec): string | undefined {
   return str(s.category) ?? strs(s.categories, 1)[0] ?? str(s.type);
 }
 
-function projectSources(raw: Rec): ProjectedSources {
+/**
+ * How a threat listing reached the indicator when it is not a direct hit:
+ * `alias` (the same file under another digest, `HashAlias`) or `cidr` (a
+ * listed range the IP falls in). A range listing is weaker evidence about
+ * one address than a listing of the address itself.
+ */
+const MATCH_TYPES: ReadonlySet<string> = new Set(["alias", "cidr"]);
+
+export function projectSources(raw: Rec): ProjectedSources {
   const threats: SourceEntry[] = [];
   const nonThreats: InfrastructureEntry[] = [];
   let threatTotal = 0;
@@ -238,10 +292,12 @@ function projectSources(raw: Rec): ProjectedSources {
     if (!name) continue;
     const category = sourceCategory(s);
     if (threat) {
-      threats.push(compact({ name, category }) as SourceEntry);
+      const match = str(s.matchType);
+      const via = match && MATCH_TYPES.has(match) ? match : undefined;
+      threats.push(compact({ name, category, via }) as SourceEntry);
     } else {
       nonThreats.push({
-        ...(compact({ name, category }) as SourceEntry),
+        ...(compact({ name, category }) as { name: string; category?: string }),
         threatClass: str(s.threatClass) as string,
       });
     }
@@ -286,9 +342,9 @@ const ATTRIBUTE_BY_CATEGORY: Record<string, string> = {
   allowlist: "allowlist",
 };
 
-function projectInfrastructure(
+export function projectInfrastructure(
   raw: Rec,
-  nonThreats: InfrastructureEntry[],
+  nonThreats: ProjectedSources["nonThreats"],
   maxSources: number,
 ): InfrastructureAttribution | undefined {
   const served = rec(raw.infrastructure);
@@ -318,10 +374,16 @@ function projectTimeline(raw: Rec) {
   const trust = rec(raw.dataTrust);
   return compact({
     firstSeen: day(
-      str(t?.firstSeen) ?? str(t?.first_seen) ?? str(trust?.firstSeen),
+      str(t?.firstSeen) ??
+        str(t?.first_seen) ??
+        str(trust?.firstSeen) ??
+        str(raw.firstSeen),
     ),
     lastSeen: day(
-      str(t?.lastSeen) ?? str(t?.last_seen) ?? str(trust?.lastSeen),
+      str(t?.lastSeen) ??
+        str(t?.last_seen) ??
+        str(trust?.lastSeen) ??
+        str(raw.lastSeen),
     ),
     trend: str(t?.trend),
     totalDetections: num(t?.totalDetections) ?? num(t?.total_detections),
@@ -419,6 +481,93 @@ function processingMs(v: unknown): number | undefined {
   return m ? Math.round(Number(m[1])) : undefined;
 }
 
+/** Longest evidence sentence relayed; the API's run to ~120 characters. */
+const REASON_CHARS = 200;
+
+/**
+ * The API's own explanation, at most `max` sentences: `evidence.reasons`
+ * (Data Trust, every type), else the score factors that pushed the score up,
+ * largest first. An agent that must justify a block quotes these.
+ */
+export function projectReasons(raw: Rec, max = 3): string[] {
+  const clipped = (xs: string[]) =>
+    xs.map((r) => clip(r, REASON_CHARS) as string).slice(0, max);
+  const evidence = strs(rec(raw.evidence)?.reasons, max);
+  if (evidence.length > 0) return clipped(evidence);
+  const factors = arr(rec(raw.riskScore)?.factors)
+    .map((f) => rec(f))
+    .filter((f): f is Rec => f !== undefined)
+    .map((f) => ({ text: str(f.description), weight: num(f.contribution) }))
+    .filter(
+      (f): f is { text: string; weight: number } =>
+        f.text !== undefined && f.weight !== undefined && f.weight > 0,
+    )
+    .sort((a, b) => b.weight - a.weight);
+  return clipped(factors.map((f) => f.text));
+}
+
+/**
+ * `pending` from `GET /check?enrichment=fast` (top level, or under `meta` on
+ * a projection replayed through a proxy): what the cache did not hold yet.
+ */
+export function pendingFacets(raw: Rec): string[] {
+  const top = strs(raw.pending, 8);
+  return top.length > 0 ? top : strs(rec(raw.meta)?.pending, 8);
+}
+
+/**
+ * Appended to a headline when facets are pending, and only then: one
+ * re-check, never a loop. The API lists a facet only while a background
+ * fetch can still fill it, so the re-check is usually complete; a facet
+ * still listed after it is not coming soon, and every re-check is a billed
+ * request.
+ */
+export function pendingHint(pending: string[]): string {
+  if (pending.length === 0) return "";
+  const [them, theyAre] =
+    pending.length === 1 ? ["it", "it is"] : ["them", "they are"];
+  return ` Not cached yet: ${pending.join(", ")}; one re-check after a few seconds may complete ${them}. If ${theyAre} still pending then, this answer stands: do not re-check again.`;
+}
+
+function projectFile(raw: Rec, indicator: string): FileFacts | undefined {
+  const info = rec(raw.hashInfo);
+  const threatFox = rec(raw.threatFox);
+  const families = [
+    ...new Set(
+      [
+        str(raw.malwareFamily),
+        ...strs(raw.malwareFamilies, 8),
+        str(threatFox?.malwareFamily),
+      ].filter(
+        (f): f is string => f !== undefined && f.toLowerCase() !== "unknown",
+      ),
+    ),
+  ];
+  const signature = str(info?.signature);
+  const family = families[0] ?? signature;
+  // The queried digest is `indicator` already; only the others help pivot.
+  const other = (d: string | undefined) =>
+    d && d.toLowerCase() !== indicator.toLowerCase() ? d : undefined;
+  const digests = compact({
+    md5: other(str(info?.md5)),
+    sha1: other(str(info?.sha1)),
+    sha256: other(str(info?.sha256)),
+  });
+  const tags = strs(info?.tags, 5);
+  const file = compact({
+    family,
+    families: families.length > 1 ? families.slice(0, 3) : undefined,
+    fileType: str(info?.fileType),
+    mimeType: str(info?.mimeType),
+    fileName: clip(str(info?.fileName), 80),
+    sizeBytes: num(info?.fileSizeBytes) ?? num(info?.fileSize),
+    signature: signature && signature !== family ? signature : undefined,
+    tags: tags.length > 0 ? tags : undefined,
+    digests: Object.keys(digests).length > 0 ? digests : undefined,
+  }) as FileFacts;
+  return Object.keys(file).length > 0 ? file : undefined;
+}
+
 export function buildHeadline(
   indicator: string,
   verdict: Verdict,
@@ -483,6 +632,33 @@ export function buildHeadline(
 export interface CheckProjectionOptions {
   requestedEnrichment?: string;
   maxSources?: number;
+  /** The input as given, reported when refanging changed it. */
+  input?: string;
+}
+
+// A classification that merely restates the verdict adds nothing to the headline.
+const VERDICT_WORDS = new Set([
+  "unknown",
+  "malicious",
+  "suspicious",
+  "clean",
+  "benign",
+  "harmless",
+]);
+
+function headlineCategory(s: string | undefined): string | undefined {
+  return s && !VERDICT_WORDS.has(s.toLowerCase()) ? s : undefined;
+}
+
+/** `input` when it says something `indicator` does not (not a mere case change). */
+export function inputIfRefanged(
+  indicator: string,
+  input: string | undefined,
+): string | undefined {
+  return input !== undefined &&
+    input.trim().toLowerCase() !== indicator.toLowerCase()
+    ? input.trim()
+    : undefined;
 }
 
 export function projectCheckIndicator(
@@ -522,22 +698,19 @@ export function projectCheckIndicator(
     summary: clip(str(riskScore?.summary), 240),
   });
   const primary = str(classification?.primary);
+  const file = type === "hash" ? projectFile(raw, indicator) : undefined;
+  const pending = pendingFacets(raw);
+  // The risk summary is often the first evidence sentence: say it once.
+  const reasons = projectReasons(raw, 4)
+    .filter((r) => r !== risk.summary)
+    .slice(0, 3);
+  const categories = strs(raw.categories, 5);
 
-  // A classification that merely restates the verdict adds nothing to the headline.
-  const VERDICT_WORDS = new Set([
-    "unknown",
-    "malicious",
-    "suspicious",
-    "clean",
-    "benign",
-    "harmless",
-  ]);
-  const headline = buildHeadline(indicator, verdict, {
+  // A hash document carries no classification on the REST path; its family
+  // (MalwareBazaar, ThreatFox) is the category an analyst would name.
+  const headlineBase = buildHeadline(indicator, verdict, {
     hits: threatTotal,
-    category:
-      primary && !VERDICT_WORDS.has(primary.toLowerCase())
-        ? primary
-        : undefined,
+    category: headlineCategory(primary) ?? headlineCategory(file?.family),
     riskScore: risk.score,
     firstSeen: timeline.firstSeen,
     lastSeen: timeline.lastSeen,
@@ -559,23 +732,31 @@ export function projectCheckIndicator(
     pwned && bool(pwned.found) && num(pwned.count) !== undefined
       ? { hashType: str(pwned.hashType) ?? "sha1", count: num(pwned.count)! }
       : undefined;
-  const fullHeadline = pwnedPassword
-    ? `${headline} It is also the ${pwnedPassword.hashType === "ntlm" ? "NTLM" : "SHA-1"} hash of a password seen ${pwnedPassword.count.toLocaleString("en-US")} times in data breaches.`
-    : headline;
+  const pwnedSentence = pwnedPassword
+    ? ` It is also the ${pwnedPassword.hashType === "ntlm" ? "NTLM" : "SHA-1"} hash of a password seen ${pwnedPassword.count.toLocaleString("en-US")} times in data breaches.`
+    : "";
+  const headline = headlineBase + pwnedSentence + pendingHint(pending);
 
   const dataTrust = rec(raw.dataTrust);
   const vulnerabilities = projectVulnerabilities(raw);
   const domain = type === "domain" || type === "url" ? projectDomain(raw) : {};
   const network = projectNetwork(raw);
+  const input = inputIfRefanged(indicator, options.input);
+  const lookupStatus = str(raw.lookupStatus);
 
   const projection: CheckIndicatorProjection = {
     indicator,
+    ...(input ? { input } : {}),
     type,
     verdict,
-    headline: fullHeadline,
+    headline,
     recommendedAction: ACTION[verdict],
     malicious: verdict === "malicious",
+    ...(lookupStatus ? { lookupStatus } : {}),
     ...(Object.keys(risk).length ? { risk } : {}),
+    ...(reasons.length ? { reasons } : {}),
+    ...(categories.length ? { categories } : {}),
+    ...(file ? { file } : {}),
     ...(confidence
       ? {
           confidence: compact({
@@ -627,6 +808,7 @@ export function projectCheckIndicator(
         options.requestedEnrichment,
       processingMs: processingMs(raw.processingTime ?? raw.processingTimeMs),
       dataTrust: str(dataTrust?.freshness) ?? str(dataTrust?.level),
+      pending: pending.length ? pending : undefined,
     }),
   };
   if (projection.meta && Object.keys(projection.meta).length === 0)

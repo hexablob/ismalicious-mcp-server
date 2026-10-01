@@ -232,7 +232,7 @@ export function envelopeFromException(e: unknown): ToolErrorEnvelope {
     return {
       error: "timeout",
       message: e.message,
-      hint: "The API did not answer in time. Retry once; raise ISMALICIOUS_TIMEOUT_MS if your network is slow.",
+      hint: "The API did not answer in time. Retry once; raise ISMALICIOUS_TIMEOUT_<TOOL>_MS (one tool) or ISMALICIOUS_TIMEOUT_MS (every tool) if your network is slow.",
     };
   }
   if (e instanceof HttpCancelledError) {

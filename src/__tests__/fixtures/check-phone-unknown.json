@@ -1,0 +1,85 @@
+{
+  "apiVersion": "v2",
+  "type": "phone",
+  "entity": "+33612345678",
+  "enrichmentLevel": "fast",
+  "processingTime": 2,
+  "lookupStatus": "unknown",
+  "verdict": "unknown",
+  "malicious": false,
+  "recommendedAction": "unverified",
+  "reasons": [
+    "No phone feed lists this number",
+    "Absence from our dataset is not evidence that the number is safe"
+  ],
+  "blocklistHits": 0,
+  "blocklistListed": false,
+  "categories": [],
+  "riskScore": {
+    "score": 0,
+    "level": "inconclusive",
+    "factors": [],
+    "summary": "No evidence about +33612345678: unverified, not a clean verdict"
+  },
+  "firstSeen": null,
+  "lastSeen": null,
+  "lastUpdated": null,
+  "sources": [],
+  "phone": {
+    "input": "06 12 34 56 78",
+    "e164": "+33612345678",
+    "countryCallingCode": "33",
+    "resolvedWith": "country"
+  },
+  "dataTrust": {
+    "observedAt": "2026-09-30T12:00:00+00:00",
+    "lastUpdated": null,
+    "firstSeen": null,
+    "lastSeen": null,
+    "dataAgeHours": null,
+    "freshness": "unknown",
+    "sourceAgreement": {
+      "count": 0,
+      "weightedStrength": -0.0,
+      "level": "none",
+      "scannerDetections": 0,
+      "scannerSuspicious": 0,
+      "scannerClean": 0
+    },
+    "sources": [],
+    "completeness": {
+      "score": 0,
+      "present": [],
+      "missing": [
+        "sources"
+      ],
+      "facetFreshness": {}
+    },
+    "providerAgreement": {
+      "status": "unknown",
+      "summary": "No cross-provider correlation signals available",
+      "contradictorySignals": []
+    }
+  },
+  "evidence": {
+    "verdict": "unknown",
+    "score": null,
+    "confidence": null,
+    "observedAt": "2026-09-30T12:00:00+00:00",
+    "reasons": [
+      "No phone feed lists this number",
+      "Absence from our dataset is not evidence that the number is safe"
+    ],
+    "contradictorySignals": [],
+    "sourceSummary": {
+      "count": 0,
+      "weightedStrength": -0.0,
+      "highReliabilityCount": 0,
+      "noiseWarnings": []
+    },
+    "freshness": "unknown",
+    "dataAgeHours": null,
+    "recommendedAction": "review",
+    "analystStatus": "new"
+  }
+}

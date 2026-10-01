@@ -1,0 +1,121 @@
+{
+  "apiVersion": "v2",
+  "type": "email",
+  "entity": "billing@invoices-portal.example",
+  "enrichmentLevel": "fast",
+  "processingTime": 2,
+  "lookupStatus": "found",
+  "verdict": "suspicious",
+  "malicious": false,
+  "recommendedAction": "review",
+  "reasons": [
+    "Address listed by 1 threat feed: Sefinek - Blacklisted Emails (spam, scam, abuse)",
+    "Highest source confidence 55/100: below 70, one list is not enough for a malicious verdict"
+  ],
+  "blocklistHits": 1,
+  "blocklistListed": true,
+  "categories": [
+    "spam",
+    "scam",
+    "abuse"
+  ],
+  "riskScore": {
+    "score": 50,
+    "level": "medium",
+    "factors": [],
+    "summary": "billing@invoices-portal.example is on a low-confidence list: review before trusting it"
+  },
+  "firstSeen": "2026-09-01T00:00:00Z",
+  "lastSeen": "2026-09-29T02:00:00Z",
+  "lastUpdated": "2026-09-29T02:00:00Z",
+  "sources": [
+    {
+      "id": "sefinek-blacklisted-emails",
+      "name": "Sefinek - Blacklisted Emails",
+      "type": "email",
+      "category": "spam",
+      "categories": [
+        "spam",
+        "scam",
+        "abuse"
+      ],
+      "confidenceBase": 55.0
+    }
+  ],
+  "email": {
+    "address": "billing@invoices-portal.example",
+    "localPart": "billing",
+    "domain": "invoices-portal.example",
+    "disposable": false,
+    "freeProvider": false,
+    "mx": true,
+    "domainReputation": {
+      "lookupStatus": "unknown",
+      "malicious": false,
+      "blocklistHits": 0,
+      "sources": [],
+      "infrastructure": []
+    }
+  },
+  "dataTrust": {
+    "observedAt": "2026-09-30T12:00:00+00:00",
+    "lastUpdated": "2026-09-29T02:00:00+00:00",
+    "firstSeen": "2026-09-01T00:00:00+00:00",
+    "lastSeen": "2026-09-29T02:00:00+00:00",
+    "dataAgeHours": 34.0,
+    "freshness": "recent",
+    "sourceAgreement": {
+      "count": 1,
+      "weightedStrength": 0.55,
+      "level": "weak",
+      "scannerDetections": 0,
+      "scannerSuspicious": 0,
+      "scannerClean": 0
+    },
+    "sources": [
+      {
+        "name": "Sefinek - Blacklisted Emails",
+        "type": "email",
+        "category": "spam",
+        "url": null,
+        "reliability": 0.55,
+        "reliabilityLevel": "low",
+        "noiseProfile": "contextual"
+      }
+    ],
+    "completeness": {
+      "score": 100,
+      "present": [
+        "sources"
+      ],
+      "missing": [],
+      "facetFreshness": {}
+    },
+    "providerAgreement": {
+      "status": "unknown",
+      "summary": "No cross-provider correlation signals available",
+      "contradictorySignals": []
+    }
+  },
+  "evidence": {
+    "verdict": "medium",
+    "score": 50,
+    "confidence": null,
+    "observedAt": "2026-09-30T12:00:00+00:00",
+    "reasons": [
+      "Address listed by 1 threat feed: Sefinek - Blacklisted Emails (spam, scam, abuse)",
+      "Highest source confidence 55/100: below 70, one list is not enough for a malicious verdict"
+    ],
+    "contradictorySignals": [],
+    "sourceSummary": {
+      "count": 1,
+      "weightedStrength": 0.55,
+      "highReliabilityCount": 0,
+      "noiseWarnings": []
+    },
+    "freshness": "recent",
+    "dataAgeHours": 34.0,
+    "recommendedAction": "review",
+    "analystStatus": "new"
+  }
+}

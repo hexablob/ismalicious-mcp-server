@@ -4,24 +4,44 @@
  *
  * Spawns dist/index.js, drives initialize → tools/list → tools/call get_cve →
  * a tools/call check_indicator that is cancelled mid-flight, and checks that
- * the cancelled call never gets a response (the spec forbids one). Runs in CI
+ * the cancelled call never gets a response (the spec forbids one). Also
+ * checks what only the real process shows: the tool name on the wire, the
+ * unauthenticated pre-warm after initialize, a repeated call answered from
+ * the result cache, an email address sent as one (refanged, lowercased, at
+ * the `fast` level) and a SHA-512 refused before any request. Runs in CI
  * after `pnpm build`; needs nothing but Node.
  */
 import { spawn } from "node:child_process";
+import { readFileSync } from "node:fs";
 import { createServer } from "node:http";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const entry = join(here, "..", "dist", "index.js");
+const emailUnknownFixture = join(
+  here,
+  "..",
+  "src",
+  "__tests__",
+  "fixtures",
+  "check-email-unknown.json",
+);
 
 function fail(msg) {
   console.error(`smoke: FAIL ${msg}`);
   process.exit(1);
 }
 
+const seen = [];
 const stub = createServer((req, res) => {
   const url = new URL(req.url, "http://stub");
+  seen.push({
+    method: req.method,
+    path: url.pathname,
+    query: url.searchParams,
+    headers: req.headers,
+  });
   if (
     url.pathname === "/api/cve" &&
     url.searchParams.get("id") === "CVE-2021-44228"
@@ -40,6 +60,16 @@ const stub = createServer((req, res) => {
         epssScore: 0.97,
       }),
     );
+    return;
+  }
+  if (
+    url.pathname === "/api/check" &&
+    (url.searchParams.get("query") ?? "").includes("@")
+  ) {
+    // What the API answers for an address nobody lists: the real body,
+    // held to the handler's output by apps/rust-api/tests/fast_check.rs.
+    res.setHeader("Content-Type", "application/json");
+    res.end(readFileSync(emailUnknownFixture));
     return;
   }
   if (url.pathname === "/api/check") {
@@ -152,6 +182,72 @@ try {
   if (cveBody.kev?.listed !== true || cveBody.epss?.score !== 0.97)
     fail(`get_cve projection: ${cve.result.content[0].text}`);
 
+  const cveCalls = () => seen.filter((r) => r.path === "/api/cve");
+  if (cveCalls()[0]?.headers["x-ismalicious-tool"] !== "get_cve")
+    fail(`X-Ismalicious-Tool: ${JSON.stringify(cveCalls()[0]?.headers)}`);
+  const warm = seen.filter((r) => r.path === "/api/health");
+  if (
+    warm.length !== 1 ||
+    warm[0].method !== "GET" ||
+    warm[0].headers["x-api-key"] !== undefined
+  )
+    fail(`prewarm: ${JSON.stringify(warm)}`);
+
+  send({
+    jsonrpc: "2.0",
+    id: 6,
+    method: "tools/call",
+    params: { name: "get_cve", arguments: { id: "CVE-2021-44228" } },
+  });
+  const again = JSON.parse((await waitFor(6)).result.content[0].text);
+  if (cveCalls().length !== 1 || again._cache?.cached !== true)
+    fail(`cache: ${cveCalls().length} calls, ${JSON.stringify(again._cache)}`);
+
+  const checkCalls = () => seen.filter((r) => r.path === "/api/check");
+  send({
+    jsonrpc: "2.0",
+    id: 7,
+    method: "tools/call",
+    params: {
+      name: "check_indicator",
+      arguments: { indicator: "Nobody[@]Example[.]org" },
+    },
+  });
+  const email = await waitFor(7);
+  const emailBody = JSON.parse(email.result.content[0].text);
+  if (
+    email.result.isError ||
+    emailBody.type !== "email" ||
+    emailBody.verdict !== "unknown" ||
+    emailBody.recommendedAction !== "unverified" ||
+    emailBody.email?.mx !== null
+  )
+    fail(`check_indicator email: ${email.result.content[0].text}`);
+  const emailQuery = checkCalls()[0]?.query;
+  if (
+    emailQuery?.get("query") !== "nobody@example.org" ||
+    emailQuery?.get("enrichment") !== "fast" ||
+    checkCalls()[0]?.headers["x-ismalicious-tool"] !== "check_indicator"
+  )
+    fail(`check_indicator email request: ${emailQuery}`);
+
+  send({
+    jsonrpc: "2.0",
+    id: 8,
+    method: "tools/call",
+    params: {
+      name: "check_indicator",
+      arguments: { indicator: "f".repeat(128) },
+    },
+  });
+  const sha512 = await waitFor(8);
+  if (
+    !sha512.result.isError ||
+    JSON.parse(sha512.result.content[0].text).error !== "invalid_params" ||
+    checkCalls().length !== 1
+  )
+    fail(`check_indicator SHA-512: ${JSON.stringify(sha512)}`);
+
   send({
     jsonrpc: "2.0",
     id: 4,
@@ -182,7 +278,7 @@ try {
     fail(`quota resource: ${quota.result.contents[0].text}`);
 
   console.log(
-    "smoke: ok (initialize, tools/list, get_cve, cancellation, quota resource)",
+    "smoke: ok (initialize, prewarm, tools/list, get_cve, tool header, cache, email check, SHA-512 refusal, cancellation, quota resource)",
   );
 } finally {
   clearTimeout(overall);

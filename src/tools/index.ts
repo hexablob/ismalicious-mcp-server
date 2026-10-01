@@ -3,8 +3,11 @@
  * gate tools stay first so v0.1 clients that index by position keep working,
  * and the v0.3 tools sit after the v0.2 ones for the same reason (then
  * `check_password_exposure`, added in 0.4.0).
- * `MCP_TOOLS` mirrors `apps/rust-api/src/infra/client.rs` (lot 2) — a parity
- * test on the Rust side reads this file.
+ * `MCP_TOOLS` mirrors `apps/rust-api/src/infra/client.rs` and
+ * `apps/web/lib/growth-metrics-constants.ts`, in this order. A Rust test reads
+ * the first `name: "…"` of every tool file in this directory (so helpers
+ * belong elsewhere); `__tests__/tools-parity.test.ts` checks all three lists
+ * from this package's suite.
  */
 
 import { bootstrapKey } from "./bootstrap-key.js";

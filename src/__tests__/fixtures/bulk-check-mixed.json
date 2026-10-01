@@ -1,0 +1,235 @@
+{
+  "success": true,
+  "total": 6,
+  "processed": 6,
+  "results": [
+    {
+      "entity": "cold.example",
+      "type": "domain",
+      "isMalicious": false,
+      "confidence": 53.0,
+      "sources": 1,
+      "categories": [],
+      "riskScore": 24,
+      "riskLevel": "low",
+      "evidence": {
+        "verdict": "low",
+        "score": 24,
+        "confidence": {
+          "score": 53,
+          "level": "medium"
+        },
+        "observedAt": "2026-09-30T12:00:00+00:00",
+        "reasons": [
+          "Low risk. Primary concerns: infrastructure.",
+          "Primary classification: malware",
+          "1 source list this entity (weighted strength 0.80)",
+          "Provider disagreement requires analyst review",
+          "Confidence: medium (53/100)"
+        ],
+        "contradictorySignals": [
+          {
+            "type": "source_disagreement",
+            "severity": "low",
+            "title": "Feeds list entity; scanner sample incomplete",
+            "description": "1 blocklist feed match, but no reliable multi-engine sample (quota, outage, or cache-only). Prefer threat feeds and infrastructure context."
+          }
+        ],
+        "sourceSummary": {
+          "count": 1,
+          "weightedStrength": 0.8,
+          "highReliabilityCount": 0,
+          "noiseWarnings": []
+        },
+        "freshness": "unknown",
+        "dataAgeHours": null,
+        "recommendedAction": "review",
+        "analystStatus": "new"
+      },
+      "analystStatus": "new",
+      "observedAt": "2026-09-30T12:00:00+00:00",
+      "recommendedAction": "review"
+    },
+    {
+      "entity": "billing@invoices-portal.example",
+      "type": "email",
+      "isMalicious": false,
+      "sources": 1,
+      "categories": [
+        "spam",
+        "scam",
+        "abuse"
+      ],
+      "riskScore": 50,
+      "riskLevel": "medium",
+      "evidence": {
+        "verdict": "medium",
+        "score": 50,
+        "confidence": null,
+        "observedAt": "2026-09-30T12:00:00+00:00",
+        "reasons": [
+          "Address listed by 1 threat feed: Sefinek - Blacklisted Emails (spam, scam, abuse)",
+          "Highest source confidence 55/100: below 70, one list is not enough for a malicious verdict"
+        ],
+        "contradictorySignals": [],
+        "sourceSummary": {
+          "count": 1,
+          "weightedStrength": 0.55,
+          "highReliabilityCount": 0,
+          "noiseWarnings": []
+        },
+        "freshness": "recent",
+        "dataAgeHours": 34.0,
+        "recommendedAction": "review",
+        "analystStatus": "new"
+      },
+      "lookupStatus": "found",
+      "analystStatus": "new",
+      "observedAt": "2026-09-30T12:00:00+00:00",
+      "recommendedAction": "review"
+    },
+    {
+      "entity": "nobody@example.org",
+      "type": "email",
+      "isMalicious": false,
+      "sources": 0,
+      "categories": [],
+      "evidence": {
+        "verdict": "unknown",
+        "score": null,
+        "confidence": null,
+        "observedAt": "2026-09-30T12:00:00+00:00",
+        "reasons": [
+          "No threat feed lists this address",
+          "Sender domain example.org is not in our dataset",
+          "MX not evaluated: no cached MX answer for example.org",
+          "Absence from our dataset is not evidence that the address is safe"
+        ],
+        "contradictorySignals": [],
+        "sourceSummary": {
+          "count": 0,
+          "weightedStrength": -0.0,
+          "highReliabilityCount": 0,
+          "noiseWarnings": []
+        },
+        "freshness": "unknown",
+        "dataAgeHours": null,
+        "recommendedAction": "review",
+        "analystStatus": "new"
+      },
+      "lookupStatus": "unknown",
+      "analystStatus": "new",
+      "observedAt": "2026-09-30T12:00:00+00:00",
+      "recommendedAction": "unverified"
+    },
+    {
+      "entity": "+1 415 555 2671",
+      "type": "phone",
+      "isMalicious": true,
+      "sources": 2,
+      "categories": [
+        "robocall",
+        "scam",
+        "spam"
+      ],
+      "riskScore": 75,
+      "riskLevel": "high",
+      "evidence": {
+        "verdict": "high",
+        "score": 75,
+        "confidence": null,
+        "observedAt": "2026-09-30T12:00:00+00:00",
+        "reasons": [
+          "Listed by 2 threat sources: CallShield - Hot Spam Numbers, FTC - Do Not Call Reported Numbers (robocall, scam, spam)",
+          "Listed by a source with confidence 80/100"
+        ],
+        "contradictorySignals": [],
+        "sourceSummary": {
+          "count": 2,
+          "weightedStrength": 1.35,
+          "highReliabilityCount": 0,
+          "noiseWarnings": []
+        },
+        "freshness": "recent",
+        "dataAgeHours": 34.0,
+        "recommendedAction": "block",
+        "analystStatus": "new"
+      },
+      "lookupStatus": "found",
+      "analystStatus": "new",
+      "observedAt": "2026-09-30T12:00:00+00:00",
+      "recommendedAction": "block"
+    },
+    {
+      "entity": "(202) 555-0143",
+      "type": "phone",
+      "isMalicious": false,
+      "sources": 2,
+      "categories": [
+        "robocall",
+        "scam"
+      ],
+      "riskScore": 55,
+      "riskLevel": "medium",
+      "evidence": {
+        "verdict": "medium",
+        "score": 55,
+        "confidence": null,
+        "observedAt": "2026-09-30T12:00:00+00:00",
+        "reasons": [
+          "Listed by FTC - Do Not Call Reported Numbers, FCC - Consumer Complaint Caller Numbers (robocall, scam); highest source confidence 55/100",
+          "Reports below confidence 60 (unverified consumer complaints) do not corroborate each other: a complaint names the displayed caller ID, which is often spoofed",
+          "Read as the North American number +12025550143; send E.164 (+…) or country= for another country"
+        ],
+        "contradictorySignals": [],
+        "sourceSummary": {
+          "count": 2,
+          "weightedStrength": 1.1,
+          "highReliabilityCount": 0,
+          "noiseWarnings": []
+        },
+        "freshness": "recent",
+        "dataAgeHours": 34.0,
+        "recommendedAction": "review",
+        "analystStatus": "new"
+      },
+      "lookupStatus": "found",
+      "analystStatus": "new",
+      "observedAt": "2026-09-30T12:00:00+00:00",
+      "recommendedAction": "review"
+    },
+    {
+      "entity": "06 12 34 56 78",
+      "type": "phone",
+      "isMalicious": false,
+      "sources": 0,
+      "categories": [],
+      "evidence": {
+        "verdict": "unknown",
+        "score": null,
+        "confidence": null,
+        "observedAt": "2026-09-30T12:00:00+00:00",
+        "reasons": [
+          "No phone feed lists this number",
+          "Absence from our dataset is not evidence that the number is safe"
+        ],
+        "contradictorySignals": [],
+        "sourceSummary": {
+          "count": 0,
+          "weightedStrength": -0.0,
+          "highReliabilityCount": 0,
+          "noiseWarnings": []
+        },
+        "freshness": "unknown",
+        "dataAgeHours": null,
+        "recommendedAction": "review",
+        "analystStatus": "new"
+      },
+      "lookupStatus": "unknown",
+      "analystStatus": "new",
+      "observedAt": "2026-09-30T12:00:00+00:00",
+      "recommendedAction": "unverified"
+    }
+  ],
+  "processingTimeMs": 2
+}

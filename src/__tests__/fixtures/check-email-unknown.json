@@ -1,0 +1,98 @@
+{
+  "apiVersion": "v2",
+  "type": "email",
+  "entity": "nobody@example.org",
+  "enrichmentLevel": "fast",
+  "processingTime": 2,
+  "lookupStatus": "unknown",
+  "verdict": "unknown",
+  "malicious": false,
+  "recommendedAction": "unverified",
+  "reasons": [
+    "No threat feed lists this address",
+    "Sender domain example.org is not in our dataset",
+    "MX not evaluated: no cached MX answer for example.org",
+    "Absence from our dataset is not evidence that the address is safe"
+  ],
+  "blocklistHits": 0,
+  "blocklistListed": false,
+  "categories": [],
+  "riskScore": {
+    "score": 0,
+    "level": "inconclusive",
+    "factors": [],
+    "summary": "No evidence about nobody@example.org: unverified, not a clean verdict"
+  },
+  "firstSeen": null,
+  "lastSeen": null,
+  "lastUpdated": null,
+  "sources": [],
+  "email": {
+    "address": "nobody@example.org",
+    "localPart": "nobody",
+    "domain": "example.org",
+    "disposable": false,
+    "freeProvider": false,
+    "mx": null,
+    "domainReputation": {
+      "lookupStatus": "unknown",
+      "malicious": false,
+      "blocklistHits": 0,
+      "sources": [],
+      "infrastructure": []
+    }
+  },
+  "dataTrust": {
+    "observedAt": "2026-09-30T12:00:00+00:00",
+    "lastUpdated": null,
+    "firstSeen": null,
+    "lastSeen": null,
+    "dataAgeHours": null,
+    "freshness": "unknown",
+    "sourceAgreement": {
+      "count": 0,
+      "weightedStrength": -0.0,
+      "level": "none",
+      "scannerDetections": 0,
+      "scannerSuspicious": 0,
+      "scannerClean": 0
+    },
+    "sources": [],
+    "completeness": {
+      "score": 0,
+      "present": [],
+      "missing": [
+        "sources"
+      ],
+      "facetFreshness": {}
+    },
+    "providerAgreement": {
+      "status": "unknown",
+      "summary": "No cross-provider correlation signals available",
+      "contradictorySignals": []
+    }
+  },
+  "evidence": {
+    "verdict": "unknown",
+    "score": null,
+    "confidence": null,
+    "observedAt": "2026-09-30T12:00:00+00:00",
+    "reasons": [
+      "No threat feed lists this address",
+      "Sender domain example.org is not in our dataset",
+      "MX not evaluated: no cached MX answer for example.org",
+      "Absence from our dataset is not evidence that the address is safe"
+    ],
+    "contradictorySignals": [],
+    "sourceSummary": {
+      "count": 0,
+      "weightedStrength": -0.0,
+      "highReliabilityCount": 0,
+      "noiseWarnings": []
+    },
+    "freshness": "unknown",
+    "dataAgeHours": null,
+    "recommendedAction": "review",
+    "analystStatus": "new"
+  }
+}

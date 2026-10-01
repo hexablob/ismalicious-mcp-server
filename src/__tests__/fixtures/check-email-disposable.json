@@ -1,0 +1,96 @@
+{
+  "apiVersion": "v2",
+  "type": "email",
+  "entity": "signup@tempinbox.example",
+  "enrichmentLevel": "fast",
+  "processingTime": 2,
+  "lookupStatus": "unknown",
+  "verdict": "suspicious",
+  "malicious": false,
+  "recommendedAction": "review",
+  "reasons": [
+    "tempinbox.example is a disposable email provider",
+    "tempinbox.example publishes a null MX record: it accepts no mail"
+  ],
+  "blocklistHits": 0,
+  "blocklistListed": false,
+  "categories": [],
+  "riskScore": {
+    "score": 50,
+    "level": "medium",
+    "factors": [],
+    "summary": "signup@tempinbox.example shows suspicious signals: review before trusting it"
+  },
+  "firstSeen": null,
+  "lastSeen": null,
+  "lastUpdated": null,
+  "sources": [],
+  "email": {
+    "address": "signup@tempinbox.example",
+    "localPart": "signup",
+    "domain": "tempinbox.example",
+    "disposable": true,
+    "freeProvider": false,
+    "mx": false,
+    "domainReputation": {
+      "lookupStatus": "found",
+      "malicious": false,
+      "blocklistHits": 0,
+      "sources": [],
+      "infrastructure": [
+        "disposable-email"
+      ]
+    }
+  },
+  "dataTrust": {
+    "observedAt": "2026-09-30T12:00:00+00:00",
+    "lastUpdated": null,
+    "firstSeen": null,
+    "lastSeen": null,
+    "dataAgeHours": null,
+    "freshness": "unknown",
+    "sourceAgreement": {
+      "count": 0,
+      "weightedStrength": -0.0,
+      "level": "none",
+      "scannerDetections": 0,
+      "scannerSuspicious": 0,
+      "scannerClean": 0
+    },
+    "sources": [],
+    "completeness": {
+      "score": 0,
+      "present": [],
+      "missing": [
+        "sources"
+      ],
+      "facetFreshness": {}
+    },
+    "providerAgreement": {
+      "status": "unknown",
+      "summary": "No cross-provider correlation signals available",
+      "contradictorySignals": []
+    }
+  },
+  "evidence": {
+    "verdict": "medium",
+    "score": 50,
+    "confidence": null,
+    "observedAt": "2026-09-30T12:00:00+00:00",
+    "reasons": [
+      "tempinbox.example is a disposable email provider",
+      "tempinbox.example publishes a null MX record: it accepts no mail"
+    ],
+    "contradictorySignals": [],
+    "sourceSummary": {
+      "count": 0,
+      "weightedStrength": -0.0,
+      "highReliabilityCount": 0,
+      "noiseWarnings": []
+    },
+    "freshness": "unknown",
+    "dataAgeHours": null,
+    "recommendedAction": "review",
+    "analystStatus": "new"
+  }
+}

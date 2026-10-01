@@ -1,0 +1,134 @@
+{
+  "apiVersion": "v2",
+  "type": "phone",
+  "entity": "+14155552671",
+  "enrichmentLevel": "fast",
+  "processingTime": 2,
+  "lookupStatus": "found",
+  "verdict": "malicious",
+  "malicious": true,
+  "recommendedAction": "block",
+  "reasons": [
+    "Listed by 2 threat sources: CallShield - Hot Spam Numbers, FTC - Do Not Call Reported Numbers (robocall, scam, spam)",
+    "Listed by a source with confidence 80/100"
+  ],
+  "blocklistHits": 2,
+  "blocklistListed": true,
+  "categories": [
+    "robocall",
+    "scam",
+    "spam"
+  ],
+  "riskScore": {
+    "score": 75,
+    "level": "high",
+    "factors": [],
+    "summary": "+14155552671 is listed by 2 threat sources"
+  },
+  "firstSeen": "2026-09-01T00:00:00Z",
+  "lastSeen": "2026-09-29T02:00:00Z",
+  "lastUpdated": "2026-09-29T02:00:00Z",
+  "sources": [
+    {
+      "id": "callshield-hot-numbers",
+      "name": "CallShield - Hot Spam Numbers",
+      "type": "phone",
+      "category": "robocall",
+      "categories": [
+        "robocall",
+        "scam",
+        "spam"
+      ],
+      "confidenceBase": 80.0,
+      "retentionDays": 14
+    },
+    {
+      "id": "ftc-dnc-reported-calls",
+      "name": "FTC - Do Not Call Reported Numbers",
+      "type": "phone",
+      "category": "robocall",
+      "categories": [
+        "robocall",
+        "scam"
+      ],
+      "confidenceBase": 55.0,
+      "retentionDays": 14
+    }
+  ],
+  "phone": {
+    "input": "+1 415 555 2671",
+    "e164": "+14155552671",
+    "countryCallingCode": "1",
+    "resolvedWith": "e164"
+  },
+  "dataTrust": {
+    "observedAt": "2026-09-30T12:00:00+00:00",
+    "lastUpdated": "2026-09-29T02:00:00+00:00",
+    "firstSeen": "2026-09-01T00:00:00+00:00",
+    "lastSeen": "2026-09-29T02:00:00+00:00",
+    "dataAgeHours": 34.0,
+    "freshness": "recent",
+    "sourceAgreement": {
+      "count": 2,
+      "weightedStrength": 1.35,
+      "level": "weak",
+      "scannerDetections": 0,
+      "scannerSuspicious": 0,
+      "scannerClean": 0
+    },
+    "sources": [
+      {
+        "name": "CallShield - Hot Spam Numbers",
+        "type": "phone",
+        "category": "robocall",
+        "url": null,
+        "reliability": 0.8,
+        "reliabilityLevel": "medium",
+        "noiseProfile": "contextual"
+      },
+      {
+        "name": "FTC - Do Not Call Reported Numbers",
+        "type": "phone",
+        "category": "robocall",
+        "url": null,
+        "reliability": 0.55,
+        "reliabilityLevel": "low",
+        "noiseProfile": "contextual"
+      }
+    ],
+    "completeness": {
+      "score": 100,
+      "present": [
+        "sources"
+      ],
+      "missing": [],
+      "facetFreshness": {}
+    },
+    "providerAgreement": {
+      "status": "unknown",
+      "summary": "No cross-provider correlation signals available",
+      "contradictorySignals": []
+    }
+  },
+  "evidence": {
+    "verdict": "high",
+    "score": 75,
+    "confidence": null,
+    "observedAt": "2026-09-30T12:00:00+00:00",
+    "reasons": [
+      "Listed by 2 threat sources: CallShield - Hot Spam Numbers, FTC - Do Not Call Reported Numbers (robocall, scam, spam)",
+      "Listed by a source with confidence 80/100"
+    ],
+    "contradictorySignals": [],
+    "sourceSummary": {
+      "count": 2,
+      "weightedStrength": 1.35,
+      "highReliabilityCount": 0,
+      "noiseWarnings": []
+    },
+    "freshness": "recent",
+    "dataAgeHours": 34.0,
+    "recommendedAction": "block",
+    "analystStatus": "new"
+  }
+}

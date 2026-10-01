@@ -1,7 +1,7 @@
 {
   "name": "@ismalicious/mcp-server",
-  "version": "0.4.0",
-  "description": "MCP server for isMalicious threat intelligence \u2014 indicator reputation verdicts, CVE lookups (CVSS, EPSS, KEV) and the isinjected prompt-injection gate for AI agents",
+  "version": "0.5.0",
+  "description": "MCP server for isMalicious threat intelligence \u2014 reputation verdicts for IPs, domains, URLs, file hashes, email addresses, phone numbers and breached passwords, CVE lookups (CVSS, EPSS, KEV) and the isinjected prompt-injection gate for AI agents",
   "mcpName": "com.ismalicious/mcp-server",
   "keywords": [
     "mcp",
@@ -9,6 +9,8 @@
     "threat-intelligence",
     "ip-reputation",
     "domain-reputation",
+    "email-reputation",
+    "phone-reputation",
     "cve",
     "epss",
     "kev",

@@ -17,6 +17,7 @@ const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export const bootstrapKey: ToolDefinition = {
   name: "bootstrap_key",
+  title: "Mint a free API key",
   description:
     "No API key is configured. Mint a free isMalicious API key from an email address, use it for the rest of this session, and return it so it can be saved in the MCP client config (ISMALICIOUS_API_KEY / ISMALICIOUS_API_SECRET). One key per IP address per day; the address receives a link to claim the account. Ask the user for their email before calling.",
   inputSchema: {
@@ -32,9 +33,20 @@ export const bootstrapKey: ToolDefinition = {
     required: ["email"],
     additionalProperties: false,
   },
+  // Creates an account and a key, and emails the address: a write, not
+  // destructive, and a second call is refused rather than repeated.
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    idempotentHint: false,
+    openWorldHint: true,
+  },
+  // `/keys/instant` exists only in the Next.js app, never on the Rust host.
+  surface: "web",
   requiresKey: false,
   bootstrapOnly: true,
   timeoutMs: 15_000,
+  // No cacheTtlSec: minting is a side effect and must never be replayed.
   async call(args, ctx) {
     const email =
       typeof args.email === "string" ? args.email.trim().toLowerCase() : "";
@@ -63,7 +75,7 @@ export const bootstrapKey: ToolDefinition = {
           "This email already has an account or a key. Read the key from https://ismalicious.com/app/account (log in or reset the password) and set ISMALICIOUS_API_KEY / ISMALICIOUS_API_SECRET.";
       } else if (err.status === 404) {
         err.hint =
-          "Key issuance lives on the web API. Point ISMALICIOUS_API_BASE at https://ismalicious.com/api (the default), not at the Rust host.";
+          "Key issuance lives on the web API only. Set ISMALICIOUS_WEB_BASE to https://ismalicious.com/api (the default), not to the Rust host.";
       }
       return fail(err);
     }

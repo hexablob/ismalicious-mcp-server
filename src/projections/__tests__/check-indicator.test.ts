@@ -10,6 +10,11 @@ import domainFixture from "../../__tests__/fixtures/check-domain.json";
 import cloudOnlyFixture from "../../__tests__/fixtures/check-ip-cloud-only.json";
 import ipFixture from "../../__tests__/fixtures/check-ip-malicious.json";
 import mixedFixture from "../../__tests__/fixtures/check-ip-mixed.json";
+import hashFixture from "../../__tests__/fixtures/check-hash-malware.json";
+// Real `enrichment=fast` bodies, written and held to the handler's output by
+// `apps/rust-api/tests/fast_check.rs`.
+import domainFastPending from "../../__tests__/fixtures/check-domain-fast-pending.json";
+import hashFastPending from "../../__tests__/fixtures/check-hash-fast-pending.json";
 
 const size = (v: unknown) => Buffer.byteLength(JSON.stringify(v));
 
@@ -292,6 +297,160 @@ describe("projectCheckIndicator", () => {
   });
 });
 
+describe("projectCheckIndicator: what an agent cites", () => {
+  const sha = hashFixture.hashInfo.sha256;
+
+  it("names a known hash's family, file and alias listing, under the cap", () => {
+    const p = projectCheckIndicator(sha, hashFixture);
+    expect(size(p)).toBeLessThanOrEqual(MAX_RESULT_BYTES);
+    expect(p.type).toBe("hash");
+    expect(p.verdict).toBe("malicious");
+    expect(p.lookupStatus).toBe("known");
+    expect(p.categories).toEqual(["malware", "stealer"]);
+    expect(p.file).toEqual({
+      family: "AgentTesla",
+      fileType: "exe",
+      mimeType: "application/x-dosexec",
+      fileName: "Invoice_2026-09_payment_confirmation_scan.exe",
+      sizeBytes: 734208,
+      tags: ["AgentTesla", "exe", "RAT", "stealer"],
+      // The queried SHA-256 is `indicator`; only the other digests are kept.
+      digests: {
+        md5: hashFixture.hashInfo.md5,
+        sha1: hashFixture.hashInfo.sha1,
+      },
+    });
+    expect(p.blocklist.sources).toContainEqual({
+      name: "Hybrid Analysis - Malicious Samples",
+      category: "malware",
+      via: "alias",
+    });
+    expect(p.timeline).toEqual({
+      firstSeen: "2026-09-27",
+      lastSeen: "2026-09-29",
+    });
+    expect(p.headline).toBe(
+      `${sha} is flagged malicious by 3 sources (AgentTesla); risk 92/100; seen from 2026-09-27 to 2026-09-29.`,
+    );
+  });
+
+  it("never surfaces OTX pulse content", () => {
+    const text = JSON.stringify(projectCheckIndicator(sha, hashFixture));
+    expect(text).not.toContain("pulse");
+    expect(text).not.toContain("logistics");
+    expect(text).not.toContain("otx");
+  });
+
+  it("keeps the top three evidence reasons, without repeating the risk summary", () => {
+    const ip = projectCheckIndicator("45.148.10.242", ipFixture);
+    expect(ip.reasons).toEqual([
+      "Primary classification: suspicious",
+      "42 sources list this entity (weighted strength 23.10)",
+      "Provider disagreement requires analyst review",
+    ]);
+    expect(ip.reasons).not.toContain(ip.risk?.summary);
+    expect(projectCheckIndicator("20.55.12.9", mixedFixture).reasons).toEqual([
+      "Listed by GreenSnow - Attackers (attack) in the last 48h",
+    ]);
+  });
+
+  it("falls back to the score factors that raised the score, largest first", () => {
+    const p = projectCheckIndicator("1.2.3.4", {
+      malicious: true,
+      sources: [{ name: "a" }],
+      riskScore: {
+        score: 70,
+        level: "high",
+        factors: [
+          { description: "Small push", contribution: 3 },
+          { description: "Held neutral", contribution: 0 },
+          { description: "Big push", contribution: 40 },
+          { contribution: 12 },
+        ],
+      },
+    });
+    expect(p.reasons).toEqual(["Big push", "Small push"]);
+  });
+
+  it("stays under the cap on every committed fixture", () => {
+    for (const [indicator, fixture] of [
+      ["45.148.10.242", ipFixture],
+      ["mo3i5n46.de", domainFixture],
+      ["13.107.6.152", cloudOnlyFixture],
+      ["20.55.12.9", mixedFixture],
+      [sha, hashFixture],
+      ["cold.example", domainFastPending],
+      [hashFastPending.hashInfo.hash, hashFastPending],
+    ] as const) {
+      expect(size(projectCheckIndicator(indicator, fixture))).toBeLessThan(
+        MAX_RESULT_BYTES * 0.6,
+      );
+    }
+  });
+
+  it("reports pending facets from the fast level and asks for a re-check", () => {
+    // A listed domain nothing had enriched: scored from its listings alone.
+    const p = projectCheckIndicator("cold.example", domainFastPending);
+    expect(p.meta).toMatchObject({
+      enrichment: "fast",
+      pending: ["dns", "whois", "geo", "certificates", "otx"],
+    });
+    expect(p.verdict).toBe("suspicious");
+    expect(p.headline).toBe(
+      "cold.example is flagged suspicious by 1 source; risk 24/100. Not cached yet: dns, whois, geo, certificates, otx; one re-check after a few seconds may complete them. If they are still pending then, this answer stands: do not re-check again.",
+    );
+    expect(
+      projectCheckIndicator("1.2.3.4", ipFixture).meta?.pending,
+    ).toBeUndefined();
+  });
+
+  it("promises a re-check only when something is pending, and only one", () => {
+    // An empty `pending` (the API lists a facet only while a warm can fill
+    // it) is a complete answer: no hint, no meta.pending.
+    const settled = projectCheckIndicator("cold.example", {
+      ...domainFastPending,
+      pending: [],
+    });
+    expect(settled.meta?.pending).toBeUndefined();
+    expect(settled.headline).not.toMatch(/re-check|Not cached/);
+    // A pending answer asks for one re-check and says when to stop: every
+    // re-check is a billed request.
+    const pending = projectCheckIndicator("cold.example", domainFastPending);
+    expect(pending.headline).toMatch(/one re-check after a few seconds/);
+    expect(pending.headline).toMatch(/do not re-check again/);
+    expect(pending.headline).not.toMatch(/re-check in a few seconds/);
+  });
+
+  it("calls a hash whose CIRCL lookup outran the deadline unknown and pending, never clean", () => {
+    const hash = hashFastPending.hashInfo.hash;
+    const p = projectCheckIndicator(hash, hashFastPending);
+    expect(p).toMatchObject({
+      type: "hash",
+      verdict: "unknown",
+      recommendedAction: "unverified",
+      malicious: false,
+      lookupStatus: "unknown",
+      meta: { enrichment: "fast", pending: ["circl"] },
+    });
+    // The API still sends its 0-100 score; for an unseen hash it measures
+    // nothing.
+    expect(p.risk).not.toHaveProperty("score");
+    expect(p.headline).toBe(
+      `${hash} is unknown to our sources: no evidence either way, which is not a clean verdict. Not cached yet: circl; one re-check after a few seconds may complete it. If it is still pending then, this answer stands: do not re-check again.`,
+    );
+  });
+
+  it("reports the input when refanging changed it", () => {
+    expect(
+      projectCheckIndicator("evil.com", ipFixture, { input: "evil[.]com" })
+        .input,
+    ).toBe("evil[.]com");
+    expect(
+      projectCheckIndicator("evil.com", ipFixture, { input: "Evil.com" }),
+    ).not.toHaveProperty("input");
+  });
+});
+
 describe("verdictFromCheck mirrors gate.rs", () => {
   it("five suspicious hits count as malicious, one as suspicious", () => {
     expect(verdictFromCheck({ reputation: { suspicious: 5 } })).toBe(
@@ -423,6 +582,11 @@ describe("detectIndicatorType", () => {
   it("classifies without a declared type", () => {
     expect(detectIndicatorType("8.8.8.8", {})).toBe("ip");
     expect(detectIndicatorType("2001:db8::1", {})).toBe("ip");
+    // Was typed `domain` by the old /^[0-9a-f:]+$/ test.
+    expect(detectIndicatorType("::ffff:1.2.3.4", {})).toBe("ip");
+    expect(detectIndicatorType("user@example.com", {})).toBe("email");
+    expect(detectIndicatorType("+14155552671", {})).toBe("phone");
+    expect(detectIndicatorType("x", { type: "phone" })).toBe("phone");
     expect(detectIndicatorType("https://a.b/c", {})).toBe("url");
     expect(detectIndicatorType("a.b/c", {})).toBe("url");
     expect(detectIndicatorType("a.b", {})).toBe("domain");

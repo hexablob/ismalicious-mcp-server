@@ -1,0 +1,277 @@
+{
+  "malicious": false,
+  "apiVersion": "v2",
+  "enrichmentLevel": "fast",
+  "processingTime": 2,
+  "firstSeen": null,
+  "lastSeen": null,
+  "lastUpdated": null,
+  "reputation": null,
+  "blocklistHits": 1,
+  "blocklistListed": true,
+  "sources": [
+    {
+      "name": "URLhaus Host File",
+      "type": "domain",
+      "category": "malware",
+      "categories": [
+        "malware"
+      ],
+      "confidenceBase": 80.0
+    }
+  ],
+  "riskScore": {
+    "score": 24,
+    "level": "low",
+    "factors": [
+      {
+        "name": "Threat feeds",
+        "weight": 0.45,
+        "score": 25.0,
+        "contribution": 11.25,
+        "description": "Threat feeds: 1 listing (weighted strength 0.80)"
+      },
+      {
+        "name": "Infrastructure",
+        "weight": 0.23,
+        "score": 34.0,
+        "contribution": 7.82,
+        "description": "WHOIS age, TLD, TLS, and Microsoft-tenant signals (combined)"
+      },
+      {
+        "name": "Context",
+        "weight": 0.1,
+        "score": 0.0,
+        "contribution": 0.0,
+        "description": "No extra contextual drivers"
+      }
+    ],
+    "summary": "Low risk. Primary concerns: infrastructure."
+  },
+  "confidence": {
+    "score": 53,
+    "level": "medium",
+    "factors": [
+      {
+        "name": "Source Agreement",
+        "score": 45.0,
+        "weight": 0.33,
+        "contribution": 14.85,
+        "description": "1 source detected this threat"
+      },
+      {
+        "name": "Source Quality",
+        "score": 80.0,
+        "weight": 0.22,
+        "contribution": 17.6,
+        "description": "Sources have good reliability"
+      },
+      {
+        "name": "Inter-Provider Agreement",
+        "score": 30.0,
+        "weight": 0.12,
+        "contribution": 3.5999999999999996,
+        "description": "Provider disagreement detected: Feeds list entity; scanner sample incomplete"
+      },
+      {
+        "name": "Data Completeness",
+        "score": 40.0,
+        "weight": 0.1,
+        "contribution": 4.0,
+        "description": "Data from 1 source type"
+      },
+      {
+        "name": "Data Freshness",
+        "score": 70.0,
+        "weight": 0.05,
+        "contribution": 3.5,
+        "description": "Data age unknown"
+      }
+    ],
+    "explanation": "Moderate confidence in threat signals. Primary signal: source quality."
+  },
+  "classification": {
+    "primary": "malware",
+    "secondary": [],
+    "confidence": 23,
+    "indicators": [
+      {
+        "type": "source",
+        "category": "malware",
+        "description": "URLhaus Host File: malware",
+        "weight": 0.36
+      }
+    ]
+  },
+  "crossCorrelation": {
+    "signals": [
+      {
+        "type": "source_disagreement",
+        "severity": "low",
+        "title": "Feeds list entity; scanner sample incomplete",
+        "description": "1 blocklist feed match, but no reliable multi-engine sample (quota, outage, or cache-only). Prefer threat feeds and infrastructure context.",
+        "riskImpact": -6,
+        "confidenceImpact": -5,
+        "metadata": {
+          "agreementType": "vt_clean_sources_flagged",
+          "vtClean": 0,
+          "sourceCount": 1
+        }
+      }
+    ],
+    "riskModifier": -6,
+    "confidenceModifier": -5,
+    "summary": "1 cross-provider signal detected (risk -6, confidence -5)."
+  },
+  "mitre": {
+    "tactics": [
+      {
+        "id": "TA0002",
+        "name": "Execution",
+        "shortName": "Execution",
+        "description": "The adversary is trying to run malicious code."
+      },
+      {
+        "id": "TA0011",
+        "name": "Command and Control",
+        "shortName": "C2",
+        "description": "The adversary is trying to communicate with compromised systems to control them."
+      }
+    ],
+    "techniques": [
+      {
+        "id": "T1105",
+        "name": "Ingress Tool Transfer",
+        "tacticId": "TA0011",
+        "tactic": "Command and Control",
+        "description": "Adversaries may transfer tools or other files from an external system.",
+        "url": "https://attack.mitre.org/techniques/T1105/"
+      },
+      {
+        "id": "T1204",
+        "name": "User Execution",
+        "tacticId": "TA0002",
+        "tactic": "Execution",
+        "description": "An adversary may rely upon specific actions by a user in order to gain execution.",
+        "url": "https://attack.mitre.org/techniques/T1204/"
+      },
+      {
+        "id": "T1059",
+        "name": "Command and Scripting Interpreter",
+        "tacticId": "TA0002",
+        "tactic": "Execution",
+        "description": "Adversaries may abuse command and script interpreters to execute commands.",
+        "url": "https://attack.mitre.org/techniques/T1059/"
+      }
+    ],
+    "relatedGroups": [
+      "APT28",
+      "APT29",
+      "Equation Group",
+      "Lazarus Group",
+      "Turla"
+    ],
+    "mitigations": [
+      "M1026 - Privileged Account Management",
+      "M1038 - Execution Prevention",
+      "M1045 - Code Signing",
+      "M1049 - Antivirus/Antimalware"
+    ]
+  },
+  "dataTrust": {
+    "observedAt": "2026-09-30T12:00:00+00:00",
+    "lastUpdated": null,
+    "firstSeen": null,
+    "lastSeen": null,
+    "dataAgeHours": null,
+    "freshness": "unknown",
+    "sourceAgreement": {
+      "count": 1,
+      "weightedStrength": 0.8,
+      "level": "weak",
+      "scannerDetections": 0,
+      "scannerSuspicious": 0,
+      "scannerClean": 0
+    },
+    "sources": [
+      {
+        "name": "URLhaus Host File",
+        "type": "domain",
+        "category": "malware",
+        "url": null,
+        "reliability": 0.8,
+        "reliabilityLevel": "medium",
+        "noiseProfile": "contextual"
+      }
+    ],
+    "completeness": {
+      "score": 13,
+      "present": [
+        "sources"
+      ],
+      "missing": [
+        "reputation",
+        "whois",
+        "geo",
+        "certificates",
+        "dns",
+        "vulnerabilities",
+        "otx"
+      ],
+      "facetFreshness": {}
+    },
+    "providerAgreement": {
+      "status": "disagreement",
+      "summary": "1 cross-provider signal detected (risk -6, confidence -5).",
+      "contradictorySignals": [
+        {
+          "type": "source_disagreement",
+          "severity": "low",
+          "title": "Feeds list entity; scanner sample incomplete",
+          "description": "1 blocklist feed match, but no reliable multi-engine sample (quota, outage, or cache-only). Prefer threat feeds and infrastructure context."
+        }
+      ]
+    }
+  },
+  "evidence": {
+    "verdict": "low",
+    "score": 24,
+    "confidence": {
+      "score": 53,
+      "level": "medium"
+    },
+    "observedAt": "2026-09-30T12:00:00+00:00",
+    "reasons": [
+      "Low risk. Primary concerns: infrastructure.",
+      "Primary classification: malware",
+      "1 source list this entity (weighted strength 0.80)",
+      "Provider disagreement requires analyst review",
+      "Confidence: medium (53/100)"
+    ],
+    "contradictorySignals": [
+      {
+        "type": "source_disagreement",
+        "severity": "low",
+        "title": "Feeds list entity; scanner sample incomplete",
+        "description": "1 blocklist feed match, but no reliable multi-engine sample (quota, outage, or cache-only). Prefer threat feeds and infrastructure context."
+      }
+    ],
+    "sourceSummary": {
+      "count": 1,
+      "weightedStrength": 0.8,
+      "highReliabilityCount": 0,
+      "noiseWarnings": []
+    },
+    "freshness": "unknown",
+    "dataAgeHours": null,
+    "recommendedAction": "review",
+    "analystStatus": "new"
+  },
+  "pending": [
+    "dns",
+    "whois",
+    "geo",
+    "certificates",
+    "otx"
+  ]
+}

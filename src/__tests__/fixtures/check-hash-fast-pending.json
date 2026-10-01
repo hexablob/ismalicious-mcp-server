@@ -1,0 +1,108 @@
+{
+  "malicious": false,
+  "reputation": {
+    "malicious": 0,
+    "suspicious": 0,
+    "harmless": 0,
+    "undetected": 0,
+    "timeout": 0
+  },
+  "sources": [],
+  "apiVersion": "v2",
+  "enrichmentLevel": "fast",
+  "hashInfo": {
+    "hashType": "sha256",
+    "hash": "5d41402abc4b2a76b9719d911017c592aa11c5d7e7f0a8b0e7c29a1f3b9d6e01"
+  },
+  "processingTime": 2,
+  "lookupStatus": "unknown",
+  "blocklistHits": 0,
+  "blocklistListed": false,
+  "firstSeen": null,
+  "lastSeen": null,
+  "lastUpdated": null,
+  "riskScore": {
+    "score": 10,
+    "level": "inconclusive",
+    "factors": [
+      {
+        "name": "Threat feeds",
+        "weight": 0.45,
+        "score": 0.0,
+        "contribution": 0.0,
+        "description": "No threat sources detected"
+      },
+      {
+        "name": "Infrastructure",
+        "weight": 0.23,
+        "score": 35.0,
+        "contribution": 8.05,
+        "description": "Registration and certificate context (combined)"
+      },
+      {
+        "name": "Context",
+        "weight": 0.1,
+        "score": 0.0,
+        "contribution": 0.0,
+        "description": "No extra contextual drivers"
+      }
+    ],
+    "summary": "Unknown hash: no malicious or trusted evidence is available. This score is not a safety verdict."
+  },
+  "dataTrust": {
+    "observedAt": "2026-09-30T12:00:00+00:00",
+    "lastUpdated": null,
+    "firstSeen": null,
+    "lastSeen": null,
+    "dataAgeHours": null,
+    "freshness": "unknown",
+    "sourceAgreement": {
+      "count": 0,
+      "weightedStrength": -0.0,
+      "level": "none",
+      "scannerDetections": 0,
+      "scannerSuspicious": 0,
+      "scannerClean": 0
+    },
+    "sources": [],
+    "completeness": {
+      "score": 67,
+      "present": [
+        "reputation",
+        "hashInfo"
+      ],
+      "missing": [
+        "otx"
+      ],
+      "facetFreshness": {}
+    },
+    "providerAgreement": {
+      "status": "unknown",
+      "summary": "No cross-provider correlation signals available",
+      "contradictorySignals": []
+    }
+  },
+  "evidence": {
+    "verdict": "unknown",
+    "score": null,
+    "confidence": null,
+    "observedAt": "2026-09-30T12:00:00+00:00",
+    "reasons": [
+      "No hash reputation evidence is available; absence of a match does not establish that the file is safe"
+    ],
+    "contradictorySignals": [],
+    "sourceSummary": {
+      "count": 0,
+      "weightedStrength": -0.0,
+      "highReliabilityCount": 0,
+      "noiseWarnings": []
+    },
+    "freshness": "unknown",
+    "dataAgeHours": null,
+    "recommendedAction": "review",
+    "analystStatus": "new"
+  },
+  "pending": [
+    "circl"
+  ]
+}

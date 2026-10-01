@@ -1,0 +1,134 @@
+{
+  "apiVersion": "v2",
+  "type": "phone",
+  "entity": "+12025550143",
+  "enrichmentLevel": "fast",
+  "processingTime": 2,
+  "lookupStatus": "found",
+  "verdict": "suspicious",
+  "malicious": false,
+  "recommendedAction": "review",
+  "reasons": [
+    "Listed by FTC - Do Not Call Reported Numbers, FCC - Consumer Complaint Caller Numbers (robocall, scam); highest source confidence 55/100",
+    "Reports below confidence 60 (unverified consumer complaints) do not corroborate each other: a complaint names the displayed caller ID, which is often spoofed",
+    "Read as the North American number +12025550143; send E.164 (+…) or country= for another country"
+  ],
+  "blocklistHits": 2,
+  "blocklistListed": true,
+  "categories": [
+    "robocall",
+    "scam"
+  ],
+  "riskScore": {
+    "score": 55,
+    "level": "medium",
+    "factors": [],
+    "summary": "+12025550143 is reported by unverified complaint feeds only: review before trusting it"
+  },
+  "firstSeen": "2026-09-01T00:00:00Z",
+  "lastSeen": "2026-09-29T02:00:00Z",
+  "lastUpdated": "2026-09-29T02:00:00Z",
+  "sources": [
+    {
+      "id": "ftc-dnc-reported-calls",
+      "name": "FTC - Do Not Call Reported Numbers",
+      "type": "phone",
+      "category": "robocall",
+      "categories": [
+        "robocall",
+        "scam"
+      ],
+      "confidenceBase": 55.0,
+      "retentionDays": 14
+    },
+    {
+      "id": "fcc-consumer-complaints-callers",
+      "name": "FCC - Consumer Complaint Caller Numbers",
+      "type": "phone",
+      "category": "robocall",
+      "categories": [
+        "robocall",
+        "scam"
+      ],
+      "confidenceBase": 55.0,
+      "retentionDays": 14
+    }
+  ],
+  "phone": {
+    "input": "(202) 555-0143",
+    "e164": "+12025550143",
+    "countryCallingCode": "1",
+    "resolvedWith": "nanp-guess"
+  },
+  "dataTrust": {
+    "observedAt": "2026-09-30T12:00:00+00:00",
+    "lastUpdated": "2026-09-29T02:00:00+00:00",
+    "firstSeen": "2026-09-01T00:00:00+00:00",
+    "lastSeen": "2026-09-29T02:00:00+00:00",
+    "dataAgeHours": 34.0,
+    "freshness": "recent",
+    "sourceAgreement": {
+      "count": 2,
+      "weightedStrength": 1.1,
+      "level": "weak",
+      "scannerDetections": 0,
+      "scannerSuspicious": 0,
+      "scannerClean": 0
+    },
+    "sources": [
+      {
+        "name": "FTC - Do Not Call Reported Numbers",
+        "type": "phone",
+        "category": "robocall",
+        "url": null,
+        "reliability": 0.55,
+        "reliabilityLevel": "low",
+        "noiseProfile": "contextual"
+      },
+      {
+        "name": "FCC - Consumer Complaint Caller Numbers",
+        "type": "phone",
+        "category": "robocall",
+        "url": null,
+        "reliability": 0.55,
+        "reliabilityLevel": "low",
+        "noiseProfile": "contextual"
+      }
+    ],
+    "completeness": {
+      "score": 100,
+      "present": [
+        "sources"
+      ],
+      "missing": [],
+      "facetFreshness": {}
+    },
+    "providerAgreement": {
+      "status": "unknown",
+      "summary": "No cross-provider correlation signals available",
+      "contradictorySignals": []
+    }
+  },
+  "evidence": {
+    "verdict": "medium",
+    "score": 55,
+    "confidence": null,
+    "observedAt": "2026-09-30T12:00:00+00:00",
+    "reasons": [
+      "Listed by FTC - Do Not Call Reported Numbers, FCC - Consumer Complaint Caller Numbers (robocall, scam); highest source confidence 55/100",
+      "Reports below confidence 60 (unverified consumer complaints) do not corroborate each other: a complaint names the displayed caller ID, which is often spoofed",
+      "Read as the North American number +12025550143; send E.164 (+…) or country= for another country"
+    ],
+    "contradictorySignals": [],
+    "sourceSummary": {
+      "count": 2,
+      "weightedStrength": 1.1,
+      "highReliabilityCount": 0,
+      "noiseWarnings": []
+    },
+    "freshness": "recent",
+    "dataAgeHours": 34.0,
+    "recommendedAction": "review",
+    "analystStatus": "new"
+  }
+}

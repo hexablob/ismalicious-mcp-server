@@ -2,10 +2,11 @@
 
 import { invalidParams } from "../errors.js";
 import { fetchJson } from "./request.js";
-import { fail, ok, type ToolDefinition } from "./types.js";
+import { fail, ok, READ_ONLY_TOOL, type ToolDefinition } from "./types.js";
 
 export const checkUrl: ToolDefinition = {
   name: "check_url",
+  title: "Check a link before fetching it",
   description:
     "Check a single URL, domain, or IP against threat intelligence before fetching it. Returns block | warn | allow. Use as a pre-fetch gate; use check_indicator when you need the full reputation picture (score, sources, timeline).",
   inputSchema: {
@@ -15,8 +16,10 @@ export const checkUrl: ToolDefinition = {
     },
     required: ["url"],
   },
+  annotations: READ_ONLY_TOOL,
   requiresKey: true,
   timeoutMs: 15_000,
+  cacheTtlSec: 60,
   async call(args, ctx) {
     if (typeof args.url !== "string" || args.url.length === 0) {
       return fail(invalidParams("url is required"));

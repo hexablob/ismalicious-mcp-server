@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 
 import { invalidParams } from "../errors.js";
 import { fetchJson } from "./request.js";
-import { fail, ok, type ToolDefinition } from "./types.js";
+import { fail, ok, READ_ONLY_TOOL, type ToolDefinition } from "./types.js";
 
 /** Hex digits sent (the range prefix) and matched locally after it. */
 const PREFIX_LENGTH = 5;
@@ -49,6 +49,7 @@ function hashFromArgs(
 
 export const checkPasswordExposure: ToolDefinition = {
   name: "check_password_exposure",
+  title: "Check password breach exposure",
   description:
     "Whether a password appears in known data breaches (Have I Been Pwned's Pwned Passwords corpus) and how many times. Give `password` (hashed with SHA-1 on this machine, never sent), or a `sha1` or `ntlm` hash, e.g. from a credential dump or an Active Directory audit. k-anonymity: only the first 5 hex digits of the hash leave this machine. Use it before accepting, generating or storing a password. Costs one request of the monthly quota.",
   inputSchema: {
@@ -77,8 +78,10 @@ export const checkPasswordExposure: ToolDefinition = {
     },
     additionalProperties: false,
   },
+  annotations: READ_ONLY_TOOL,
   requiresKey: true,
   timeoutMs: 10_000,
+  // No `cacheTtlSec`: the cache key would hold the password itself.
   async call(args, ctx) {
     const input = hashFromArgs(args);
     if (typeof input === "string") return fail(invalidParams(input));
