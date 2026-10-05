@@ -44,7 +44,9 @@ reviewed tag and uses OIDC and `--provenance`. There is no credential fallback,
 automatic tag-push publication, or automatic permission change.
 
 Only after those approvals, dispatch `npm-publish.yml` from `main`, selecting
-`release_tag=v0.6.1` and `confirmation=PUBLISH`. It publishes under the
+`release_tag=v0.6.1` and `confirmation=PUBLISH`. The tag must identify the same
+commit as main at dispatch time, so the actual checkout matches the GitHub
+source SHA recorded in provenance; an older tag is refused. It publishes under the
 `review-candidate` npm dist-tag, preserving the existing `latest` version.
 The workflow fails if the version already exists, its tag differs from its
 version, tests fail or provenance metadata is absent. A failed post-publish

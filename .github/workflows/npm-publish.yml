@@ -36,6 +36,9 @@ jobs:
         run: |
           node --input-type=module <<'NODE'
           import { readFileSync } from 'node:fs';
+          import { execFileSync } from 'node:child_process';
+          const sourceSha = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+          if (sourceSha !== process.env.GITHUB_SHA) throw new Error('Release tag must identify the dispatch source commit so provenance names the actual build source');
           const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
           if (pkg.name !== '@ismalicious/mcp-server' || !/^v[0-9]+\.[0-9]+\.[0-9]+$/.test(process.env.RELEASE_TAG) || process.env.RELEASE_TAG !== `v${pkg.version}`) {
             throw new Error('The reviewed release tag must match the package version');
