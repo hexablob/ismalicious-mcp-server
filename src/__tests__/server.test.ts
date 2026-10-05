@@ -45,9 +45,9 @@ describe("initialize", () => {
       protocolVersion: PROTOCOL_VERSION,
       capabilities: { tools: { listChanged: true }, resources: {} },
     });
-    expect((res?.result as { instructions: string }).instructions).toContain(
-      "check_indicator",
-    );
+    const instructions = (res?.result as { instructions: string }).instructions;
+    expect(instructions).toContain("check_indicator");
+    expect(instructions).toContain("scan_email");
   });
 
   it("tells an agent to re-check pending facets once, never in a loop", async () => {
@@ -149,6 +149,7 @@ describe("tools/list", () => {
       "search_indicators",
       "check_indicators",
       "check_password_exposure",
+      "scan_email",
     ]);
   });
 
@@ -213,6 +214,11 @@ describe("tools/list", () => {
       {
         name: "check_password_exposure",
         title: "Check password breach exposure",
+        annotations: readOnly,
+      },
+      {
+        name: "scan_email",
+        title: "Scan an email for phishing and malware",
         annotations: readOnly,
       },
       {
@@ -1869,7 +1875,7 @@ describe("bootstrap_key", () => {
       id: 2,
       method: "tools/list",
     });
-    expect((list?.result as { tools: unknown[] }).tools).toHaveLength(8);
+    expect((list?.result as { tools: unknown[] }).tools).toHaveLength(9);
   });
 
   it("explains the one-per-IP-per-day limit on 429", async () => {

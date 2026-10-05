@@ -1,0 +1,73 @@
+{
+  "verdict": "clean",
+  "recommendedAction": "deliver",
+  "riskScore": 5,
+  "headline": "No evidence of malice: the sender, an established domain, passed DMARC at your receiving system and nothing the message points at is listed.",
+  "reasons": [
+    {
+      "code": "link.anchor_mismatch_tracked",
+      "severity": "info",
+      "summary": "A link shows one site and opens a widely used domain, usually click tracking.",
+      "evidence": "shows brand.com opens click[.]mailer[.]test"
+    }
+  ],
+  "sender": {
+    "address": "news@brand.com",
+    "domain": "brand.com",
+    "displayName": "News",
+    "verdict": "unknown",
+    "freeProvider": false,
+    "disposable": false,
+    "mx": true,
+    "replyTo": [],
+    "posture": {
+      "grade": "B",
+      "hasSpf": true,
+      "hasDmarc": true,
+      "hasMx": true
+    }
+  },
+  "authentication": {
+    "status": "trusted",
+    "dmarc": "pass",
+    "headerFrom": "brand.com"
+  },
+  "links": [
+    {
+      "url": "https://click.mailer.test/r/abc",
+      "host": "click.mailer.test",
+      "verdict": "unknown",
+      "sources": 0,
+      "flags": ["anchor_mismatch"],
+      "anchorText": "www.brand.com/offer",
+      "shownDomain": "brand.com"
+    }
+  ],
+  "attachments": [],
+  "contacts": [],
+  "injection": {
+    "score": 0.0,
+    "families": [],
+    "hiddenScore": 0.0
+  },
+  "coverage": {
+    "ran": [
+      "sender",
+      "authentication",
+      "sender_posture",
+      "links",
+      "brands",
+      "newly_registered_domains",
+      "injection",
+      "contacts"
+    ],
+    "skipped": [
+      {
+        "check": "connecting_ip",
+        "reason": "no public address in the Received chain at or below the trusted boundary"
+      }
+    ],
+    "truncated": false
+  },
+  "latencyMs": 2
+}

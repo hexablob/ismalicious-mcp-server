@@ -164,6 +164,7 @@ try {
     "search_indicators",
     "check_indicators",
     "check_password_exposure",
+    "scan_email",
   ]) {
     if (!names.includes(n)) fail(`tools/list missing ${n}: ${names.join(",")}`);
   }

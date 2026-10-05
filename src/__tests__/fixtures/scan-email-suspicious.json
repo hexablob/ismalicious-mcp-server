@@ -1,0 +1,106 @@
+{
+  "verdict": "suspicious",
+  "recommendedAction": "review",
+  "riskScore": 85,
+  "headline": "Review: The sender's domain imitates a well-known brand.",
+  "reasons": [
+    {
+      "code": "sender.brand_lookalike",
+      "severity": "high",
+      "summary": "The sender's domain imitates a well-known brand.",
+      "evidence": "paypal-secure[.]test pairs PayPal (paypal[.]com) with a word phishing uses"
+    },
+    {
+      "code": "headers.display_name_address",
+      "severity": "high",
+      "summary": "The display name shows one address while the message comes from another.",
+      "evidence": "support@paypal.com <noreply@paypal-secure.test>"
+    },
+    {
+      "code": "link.anchor_mismatch",
+      "severity": "high",
+      "summary": "A link shows one site and opens another.",
+      "evidence": "shows paypal.com opens login[.]lookalike[.]test"
+    },
+    {
+      "code": "headers.display_name_brand",
+      "severity": "medium",
+      "summary": "The display name claims a well-known brand while the message comes from another domain.",
+      "evidence": "PayPal claimed, From noreply@paypal-secure[.]test"
+    },
+    {
+      "code": "headers.reply_to_freemail",
+      "severity": "medium",
+      "summary": "Replies go to a free mail address while the message claims a company domain.",
+      "evidence": "From noreply@paypal-secure.test / Reply-To helpdesk@gmail.com"
+    },
+    {
+      "code": "sender.no_mail_authentication",
+      "severity": "low",
+      "summary": "The sender's domain publishes neither SPF nor DMARC: anyone can send as it.",
+      "evidence": "paypal-secure.test"
+    }
+  ],
+  "sender": {
+    "address": "noreply@paypal-secure.test",
+    "domain": "paypal-secure.test",
+    "displayName": "support@paypal.com",
+    "verdict": "unknown",
+    "freeProvider": false,
+    "disposable": false,
+    "mx": true,
+    "replyTo": ["helpdesk@gmail.com"],
+    "posture": {
+      "grade": "F",
+      "hasSpf": false,
+      "hasDmarc": false,
+      "hasMx": true,
+      "spoofable": true
+    }
+  },
+  "authentication": {
+    "status": "unverified"
+  },
+  "links": [
+    {
+      "url": "https://login.lookalike.test/verify",
+      "host": "login.lookalike.test",
+      "verdict": "unknown",
+      "sources": 0,
+      "flags": ["anchor_mismatch"],
+      "anchorText": "www.paypal.com",
+      "shownDomain": "paypal.com"
+    }
+  ],
+  "attachments": [],
+  "contacts": [],
+  "injection": {
+    "score": 0.0,
+    "families": [],
+    "hiddenScore": 0.0
+  },
+  "coverage": {
+    "ran": [
+      "sender",
+      "reply_to",
+      "sender_posture",
+      "links",
+      "brands",
+      "newly_registered_domains",
+      "injection",
+      "contacts"
+    ],
+    "skipped": [
+      {
+        "check": "authentication",
+        "reason": "no Authentication-Results header from a system you vouched for (context.authservId or trustAuthenticationResults); SPF, DKIM and DMARC are not verified by this scan yet"
+      },
+      {
+        "check": "connecting_ip",
+        "reason": "no public address in the Received chain at or below the trusted boundary"
+      }
+    ],
+    "truncated": false
+  },
+  "latencyMs": 2
+}

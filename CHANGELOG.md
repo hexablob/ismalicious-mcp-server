@@ -7,6 +7,58 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-10-01
+
+One new tool: `scan_email` reads a whole email message, not one address, for
+phishing and malware. It calls `POST /mail/scan`, so this release is published
+after the API that serves it (PUBLISHING.md); against an API without the route
+the tool answers `not_found`, and nothing else changes.
+
+### Added
+
+- `scan_email`: send the raw message (`eml`, up to 10 MiB, preferred: its
+  attachments are read for structure, never run) or the fields you already
+  parsed (`message`: `headers`, `from`, `replyTo`, `returnPath`, `subject`,
+  `text`, `html`, `attachments` with names, types and any of `sha256` /
+  `sha1` / `md5`), plus what you know about your own receiving system:
+  `authservId`,
+  `trustAuthenticationResults`, `trustedHops`, `connectingIp`. Exactly one of
+  `eml` and `message`; anything else is refused before a request.
+- The answer is the API's own verdict, projected under 4 KB: `verdict`
+  (`malicious` / `suspicious` / `clean` / `inconclusive`),
+  `recommendedAction` (`quarantine` / `review` / `warn` / `deliver`),
+  `riskScore`, a `headline` to relay, the six strongest `reasons`, the
+  `sender`, `authentication`, `connectingIp`, the links and attachments that
+  carry a signal (`links.flagged`, `attachments.flagged`), addresses and
+  numbers in the body the dataset flags (`contacts`), prompt-injection findings
+  aimed at an AI reading the mail (`injection`, hidden text included) and
+  `coverage.skipped`, what the scan could not check and why. Hosts are written
+  defanged (`evil[.]example`).
+- Beyond hashes and names, the answer carries what the scan read in the message
+  itself: brand look-alikes in the sender, `Reply-To`, links and display name
+  (`sender.brand_lookalike`, `link.brand_lookalike`,
+  `headers.display_name_brand`: the brand and its real site are named);
+  whether the sender's domain can be forged (`sender.spoofable`, from its DMARC
+  policy); domains registered in the last 45 days that looked like an
+  impersonation; and, from a raw message, the structure of attachments
+  (`attachments.flagged[].detectedType` and flags such as `disguised_program`,
+  `macro_project`, `remote_template`, `archive_risky`, `pdf_launch`,
+  `html_smuggling`), the addresses found inside them and inside an attached
+  message, read as a message of its own (`links.flagged[].origin` and `from`).
+- What the verdict means: `malicious` needs a listing in the dataset (the shape
+  of a message alone asks for a `review` at most); `clean` is a positive claim
+  and needs your own system's DMARC pass (`authservId` or
+  `trustAuthenticationResults`) from a sender domain the dataset knows as
+  established, so a message with nothing against it and no such evidence is
+  `inconclusive`, which is not safe; `deliver` is no
+  objection from this scan, never a reason to release a message another engine
+  quarantined. A body the server cannot read is reported as unscanned and sent
+  to `review`, never delivered.
+- One scan of the scan meter per message, whatever its size, never a request of
+  the monthly quota. Never cached (every message is a meter event), 20 s
+  timeout (`ISMALICIOUS_TIMEOUT_SCAN_EMAIL_MS`), counted by Rust as
+  `mcp_tool_scan_email`.
+
 ## [0.5.0] - 2026-09-30
 
 Email addresses and phone numbers get a real verdict, and each call waits

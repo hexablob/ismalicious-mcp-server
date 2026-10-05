@@ -1,0 +1,74 @@
+{
+  "verdict": "inconclusive",
+  "recommendedAction": "deliver",
+  "riskScore": 5,
+  "headline": "No evidence of malice found, but the scan cannot vouch for this message: the sender was not authenticated by a system you told us to trust.",
+  "reasons": [
+    {
+      "code": "link.anchor_mismatch_tracked",
+      "severity": "info",
+      "summary": "A link shows one site and opens a widely used domain, usually click tracking.",
+      "evidence": "shows brand.com opens click[.]mailer[.]test"
+    }
+  ],
+  "sender": {
+    "address": "news@brand.com",
+    "domain": "brand.com",
+    "displayName": "News",
+    "verdict": "unknown",
+    "freeProvider": false,
+    "disposable": false,
+    "mx": true,
+    "replyTo": [],
+    "posture": {
+      "grade": "B",
+      "hasSpf": true,
+      "hasDmarc": true,
+      "hasMx": true
+    }
+  },
+  "authentication": {
+    "status": "unverified"
+  },
+  "links": [
+    {
+      "url": "https://click.mailer.test/r/abc",
+      "host": "click.mailer.test",
+      "verdict": "unknown",
+      "sources": 0,
+      "flags": ["anchor_mismatch"],
+      "anchorText": "www.brand.com/offer",
+      "shownDomain": "brand.com"
+    }
+  ],
+  "attachments": [],
+  "contacts": [],
+  "injection": {
+    "score": 0.0,
+    "families": [],
+    "hiddenScore": 0.0
+  },
+  "coverage": {
+    "ran": [
+      "sender",
+      "sender_posture",
+      "links",
+      "brands",
+      "newly_registered_domains",
+      "injection",
+      "contacts"
+    ],
+    "skipped": [
+      {
+        "check": "authentication",
+        "reason": "no Authentication-Results header from a system you vouched for (context.authservId or trustAuthenticationResults); SPF, DKIM and DMARC are not verified by this scan yet"
+      },
+      {
+        "check": "connecting_ip",
+        "reason": "no public address in the Received chain at or below the trusted boundary"
+      }
+    ],
+    "truncated": false
+  },
+  "latencyMs": 2
+}
