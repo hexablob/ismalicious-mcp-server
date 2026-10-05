@@ -542,13 +542,18 @@ of this session.
 ## Development
 
 ```bash
-pnpm --filter @ismalicious/mcp-server typecheck test build
-node packages/mcp-server/scripts/check-version.mjs   # versions and server.json shape
-node packages/mcp-server/scripts/smoke.mjs           # stdio end-to-end against a stub API
+npm ci --ignore-scripts
+npm run typecheck
+npm test
+npm run build
+npm run check-version
+npm run smoke
 ```
 
-The version is declared once in `src/version.ts`. See `PUBLISHING.md` for npm
-and the MCP registry; `CHANGELOG.md` for what changed.
+Use Node 24 for development; the packaged server runs on Node 18 or newer.
+The version is declared in `src/version.ts`. See `PUBLISHING.md` for the
+prepared public-source provenance release workflow and its pending owner
+approvals. A prepared workflow does not attest earlier npm releases.
 
 The `Dockerfile` is the build Glama runs to list the server. It sets a
 placeholder key pair so `tools/list` shows every tool; pass a real pair with

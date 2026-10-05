@@ -1,6 +1,6 @@
 {
   "name": "@ismalicious/mcp-server",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "MCP server for isMalicious threat intelligence \u2014 reputation verdicts for IPs, domains, URLs, file hashes, email addresses, phone numbers and breached passwords, CVE lookups (CVSS, EPSS, KEV), the isinjected prompt-injection gate for AI agents and email-message scanning for phishing and malware",
   "mcpName": "com.ismalicious/mcp-server",
   "keywords": [
@@ -59,13 +59,14 @@
     "test:watch": "vitest",
     "check-version": "node scripts/check-version.mjs",
     "smoke": "node scripts/smoke.mjs",
-    "validate-server-json": "node scripts/validate-server-json.mjs"
+    "validate-server-json": "node scripts/validate-server-json.mjs",
+    "verify-provenance": "node scripts/verify-provenance.mjs"
   },
   "devDependencies": {
     "@types/node": "^20",
     "tsup": "^8.0.0",
     "typescript": "^5.9.3",
-    "vitest": "^2.0.0"
+    "vitest": "4.1.11"
   },
   "engines": {
     "node": ">=18"
@@ -73,5 +74,8 @@
   "publishConfig": {
     "access": "public"
   },
-  "sideEffects": false
+  "sideEffects": false,
+  "overrides": {
+    "esbuild": "0.28.1"
+  }
 }

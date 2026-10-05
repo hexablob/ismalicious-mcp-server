@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.1 (unreleased)
+
+- Mirror the complete 0.6.0 source, including `scan_email`, in the public repository.
+- Prepare an explicitly dispatched public-source npm provenance release workflow. No release or trusted publisher is created by this change.
+- Use patched Vitest and esbuild versions for standalone build/test CI. The distributed server keeps zero runtime dependencies and the existing tool behavior.
+
+
 All notable changes to `@ismalicious/mcp-server` will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),

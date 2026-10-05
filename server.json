@@ -3,14 +3,14 @@
   "name": "com.ismalicious/mcp-server",
   "title": "isMalicious threat intelligence for AI agents",
   "description": "Reputation for IPs, domains, URLs, hashes, emails, phones; CVEs; injection and email scans",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "websiteUrl": "https://ismalicious.com/prompt-injection-scanner",
   "packages": [
     {
       "registryType": "npm",
       "registryBaseUrl": "https://registry.npmjs.org",
       "identifier": "@ismalicious/mcp-server",
-      "version": "0.6.0",
+      "version": "0.6.1",
       "transport": {
         "type": "stdio"
       },
