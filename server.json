@@ -2,15 +2,15 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "com.ismalicious/mcp-server",
   "title": "isMalicious threat intelligence for AI agents",
-  "description": "Reputation of IPs, domains, URLs, hashes, emails and phones; CVE lookups; prompt-injection scans",
-  "version": "0.5.0",
+  "description": "Reputation for IPs, domains, URLs, hashes, emails, phones; CVEs; injection and email scans",
+  "version": "0.6.1",
   "websiteUrl": "https://ismalicious.com/prompt-injection-scanner",
   "packages": [
     {
       "registryType": "npm",
       "registryBaseUrl": "https://registry.npmjs.org",
       "identifier": "@ismalicious/mcp-server",
-      "version": "0.5.0",
+      "version": "0.6.1",
       "transport": {
         "type": "stdio"
       },
@@ -35,7 +35,7 @@
         },
         {
           "name": "ISMALICIOUS_TIMEOUT_MS",
-          "description": "Replaces every tool's timeout, in milliseconds (defaults: gate 15000, check_indicator 25000, CVE 10000, search_indicators 20000, check_indicators 60000, check_password_exposure 10000). ISMALICIOUS_TIMEOUT_<TOOL>_MS, e.g. ISMALICIOUS_TIMEOUT_CHECK_INDICATOR_MS, sets one tool's timeout and wins over it",
+          "description": "Replaces every tool's timeout, in milliseconds (defaults: gate 15000, check_indicator 25000, CVE 10000, search_indicators 20000, check_indicators 60000, check_password_exposure 10000, scan_email 20000). ISMALICIOUS_TIMEOUT_<TOOL>_MS, e.g. ISMALICIOUS_TIMEOUT_CHECK_INDICATOR_MS, sets one tool's timeout and wins over it",
           "isRequired": false,
           "isSecret": false
         },

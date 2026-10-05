@@ -9,7 +9,8 @@
  * /search`) and `check_indicators` (`POST /bulk/check`). `bootstrap_key`
  * covers the no-key start. v0.4 types every indicator locally before the call
  * (`indicators.ts`), which is how email addresses and phone numbers reach
- * `check_indicator` and `check_indicators` without a new tool.
+ * `check_indicator` and `check_indicators` without a new tool. v0.6 adds
+ * `scan_email`: a whole message (`POST /mail/scan`), not one address.
  *
  * The transport wiring lives in `index.ts`; this module is pure request
  * dispatch so it can be unit-tested without a socket or the network. The HTTP
@@ -71,6 +72,7 @@ export const INSTRUCTIONS = [
   "get_cve is the only CVE lookup path (recent_cves lists the latest); do not guess other routes.",
   "search_indicators finds lookalike and typosquat indicators around a keyword (no verdicts). check_indicators triages up to 100 mixed indicators in one call and charges one request per unique indicator sent; prefer check_indicator for a single one.",
   "check_password_exposure says whether a password (hashed locally, never sent) or its SHA-1/NTLM hash is in known breach dumps; only a 5-character hash prefix leaves the machine.",
+  "scan_email scans one email message for phishing and malware: send the raw message (eml, preferred: attachments are then read for structure, never run) or the fields you parsed (message). It returns a verdict (malicious/suspicious/clean/inconclusive), a recommendedAction (quarantine/review/warn/deliver), the strongest reasons and coverage.skipped, what it could not check. malicious needs a listing in our data; clean needs your own system's DMARC pass (authservId or trustAuthenticationResults) from a sender domain the dataset knows as established; inconclusive is not safe, and deliver is no objection, never a reason to release a message another engine held. One scan per message, not a request.",
   "When a result has isError with quota.retry_after or quota.resets_at, wait for it instead of retrying; a 401 means the key is missing or revoked.",
 ].join("\n");
 

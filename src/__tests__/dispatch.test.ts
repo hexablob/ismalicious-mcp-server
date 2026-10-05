@@ -82,6 +82,7 @@ const ARGS: Record<string, Record<string, unknown>> = {
   search_indicators: { keywords: "paypal" },
   check_indicators: { indicators: ["evil.example"] },
   check_password_exposure: { sha1: "5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8" },
+  scan_email: { eml: "From: a@b.test\r\n\r\nhello" },
   bootstrap_key: { email: "a@b.co" },
 };
 
@@ -394,6 +395,14 @@ describe("result cache", () => {
     const server = make(http);
     await server.handle(call("scan_before_use", ARGS.scan_before_use));
     await server.handle(call("scan_before_use", ARGS.scan_before_use));
+    expect(http.post).toHaveBeenCalledTimes(2);
+  });
+
+  it("never caches scan_email: every message is a scan on the meter", async () => {
+    const http = stubHttp();
+    const server = make(http);
+    await server.handle(call("scan_email", ARGS.scan_email));
+    await server.handle(call("scan_email", ARGS.scan_email));
     expect(http.post).toHaveBeenCalledTimes(2);
   });
 

@@ -1,0 +1,162 @@
+{
+  "verdict": "malicious",
+  "recommendedAction": "quarantine",
+  "riskScore": 100,
+  "headline": "Quarantine: An attachment matches a known malicious file hash.",
+  "reasons": [
+    {
+      "code": "attachment.known_malware",
+      "severity": "high",
+      "summary": "An attachment matches a known malicious file hash.",
+      "evidence": "invoice.pdf.exe (AgentTesla)"
+    },
+    {
+      "code": "link.listed",
+      "severity": "high",
+      "summary": "A link points to a host listed as malicious.",
+      "evidence": "evil[.]example"
+    },
+    {
+      "code": "ip.listed",
+      "severity": "high",
+      "summary": "The server that delivered the message is listed as malicious.",
+      "evidence": "45[.]83[.]64[.]1"
+    },
+    {
+      "code": "attachment.double_extension",
+      "severity": "high",
+      "summary": "An attachment's name hides a program behind a document extension.",
+      "evidence": "invoice.pdf.exe"
+    },
+    {
+      "code": "attachment.program",
+      "severity": "high",
+      "summary": "An attachment is a program or a script.",
+      "evidence": "invoice.pdf.exe"
+    },
+    {
+      "code": "sender.brand_lookalike",
+      "severity": "high",
+      "summary": "The sender's domain imitates a well-known brand.",
+      "evidence": "paypal-secure[.]test pairs PayPal (paypal[.]com) with a word phishing uses"
+    },
+    {
+      "code": "auth.dmarc_fail",
+      "severity": "high",
+      "summary": "Your receiving system's DMARC check failed: the sender's domain did not authorize this message."
+    },
+    {
+      "code": "link.anchor_mismatch",
+      "severity": "high",
+      "summary": "A link shows one site and opens another.",
+      "evidence": "shows paypal.com opens evil[.]example"
+    },
+    {
+      "code": "attachment.type_mismatch",
+      "severity": "medium",
+      "summary": "An attachment's declared type contradicts its name.",
+      "evidence": "invoice.pdf.exe"
+    },
+    {
+      "code": "headers.display_name_brand",
+      "severity": "medium",
+      "summary": "The display name claims a well-known brand while the message comes from another domain.",
+      "evidence": "PayPal claimed, From service@paypal-secure[.]test"
+    },
+    {
+      "code": "headers.reply_to_freemail",
+      "severity": "medium",
+      "summary": "Replies go to a free mail address while the message claims a company domain.",
+      "evidence": "From service@paypal-secure.test / Reply-To helpdesk@gmail.com"
+    },
+    {
+      "code": "auth.spf_fail",
+      "severity": "medium",
+      "summary": "The sending server is not authorized by the sender domain's SPF record."
+    }
+  ],
+  "sender": {
+    "address": "service@paypal-secure.test",
+    "domain": "paypal-secure.test",
+    "displayName": "PayPal Support",
+    "verdict": "unknown",
+    "freeProvider": false,
+    "disposable": false,
+    "mx": true,
+    "returnPath": "bounce@evil.example",
+    "replyTo": ["helpdesk@gmail.com"],
+    "posture": {
+      "grade": "F",
+      "hasSpf": false,
+      "hasDmarc": false,
+      "hasMx": true,
+      "spoofable": true
+    }
+  },
+  "authentication": {
+    "status": "trusted",
+    "spf": "fail",
+    "dmarc": "fail",
+    "headerFrom": "paypal-secure.test"
+  },
+  "connectingIp": {
+    "address": "45.83.64.1",
+    "verdict": "malicious",
+    "sources": 1,
+    "listed": ["Some Honeypot - Attackers"]
+  },
+  "links": [
+    {
+      "url": "https://evil.example/login",
+      "host": "evil.example",
+      "verdict": "malicious",
+      "sources": 2,
+      "flags": ["anchor_mismatch"],
+      "anchorText": "www.paypal.com",
+      "shownDomain": "paypal.com"
+    }
+  ],
+  "attachments": [
+    {
+      "filename": "invoice.pdf.exe",
+      "contentType": "application/pdf",
+      "size": 3,
+      "inline": false,
+      "digests": {
+        "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
+        "sha1": "a9993e364706816aba3e25717850c26c9cd0d89d",
+        "md5": "900150983cd24fb0d6963f7d28e17f72"
+      },
+      "verdict": "malicious",
+      "knownGood": false,
+      "family": "AgentTesla",
+      "flags": ["risky_extension", "double_extension", "type_mismatch"],
+      "detectedType": "text"
+    }
+  ],
+  "contacts": [],
+  "injection": {
+    "score": 0.0,
+    "families": [],
+    "hiddenScore": 0.0
+  },
+  "coverage": {
+    "ran": [
+      "sender",
+      "reply_to",
+      "authentication",
+      "sender_posture",
+      "connecting_ip",
+      "links",
+      "attachment_hashes",
+      "attachment_structure",
+      "brands",
+      "newly_registered_domains",
+      "injection",
+      "contacts"
+    ],
+    "skipped": [],
+    "truncated": false
+  },
+  "latencyMs": 2
+}

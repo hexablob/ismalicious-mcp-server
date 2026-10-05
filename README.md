@@ -3,8 +3,9 @@
 A zero-dependency [Model Context Protocol](https://modelcontextprotocol.io)
 server that gives an AI agent isMalicious threat intelligence: reputation
 verdicts for IP addresses, domains, URLs, file hashes, email addresses and
-phone numbers, the CVE catalog, and the isinjected gate that scans untrusted
-content for prompt injection before the agent acts on it.
+phone numbers, the CVE catalog, the isinjected gate that scans untrusted
+content for prompt injection before the agent acts on it, and a scanner that
+reads one whole email message for phishing and malware.
 
 ## Install
 
@@ -42,6 +43,7 @@ Registry name: `com.ismalicious/mcp-server`
 | `search_indicators`       | Domains the corpus lists that look like a brand or domain — typosquats, homoglyphs, other TLDs or hosts, phishing-word combinations — most dangerous first. `total_hits` counts the upstream sample; `truncated` is true when omission is known, null when unknown. Follow up with `check_indicators` for verdicts.                                                                                                                                                                                                                                                                                                 | 1 request on `api.ismalicious.com`; burst limit only on the default base |
 | `check_indicators`        | Up to 100 indicators of any of the six kinds in one call: per row `malicious`, `recommendedAction` (block/escalate/review/monitor/allow/unverified), risk, blocklist count, categories, `lookupStatus`, `infrastructure`. **Each unique indicator sent charges one request**, including rows the API cannot type; SHA-512, TLSH and ssdeep rows are refused locally and cost nothing. Plans cap the batch (Free 10, Basic 50, Pro 100).                                                                                                                                                                             | 1 request per indicator                                                  |
 | `check_password_exposure` | Whether a password, or its SHA-1 or NTLM hash, is in known breach dumps (Have I Been Pwned's Pwned Passwords) and how many times. A password is hashed locally; only the first 5 hex digits of the hash are sent.                                                                                                                                                                                                                                                                                                                                                                                                   | 1 request                                                                |
+| `scan_email`              | Scan one email message for phishing and malware: raw `eml` or parsed `message`. `verdict` (malicious/suspicious/clean/inconclusive), `recommendedAction` (quarantine/review/warn/deliver), risk 0-100, a `headline` to relay, the strongest `reasons`, `coverage.skipped`. `malicious` needs a listing in the dataset; `clean` needs your own system's DMARC pass and a sender domain the dataset knows as established; `deliver` never releases a message another engine held. From a raw message, attachments are also read for structure; it never runs an attachment or fetches a link.                         | 1 scan per message                                                       |
 | `bootstrap_key`           | Only without a configured key: mint a free key from an email, one per IP per day.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | —                                                                        |
 
 The default search API reads a bare keyword as its `.com` (`paypal` →
@@ -297,6 +299,144 @@ comes; its rows carry no NSRL flag.
 every row, split into `maliciousReturned` and `maliciousOmitted`.
 `search_indicators` does the same with `indicators` past 32 KB.
 
+### `scan_email` example
+
+`scan_email` with a parsed message whose shape alone is suspicious (nothing in
+the dataset lists any of it, so it is a review, never a quarantine):
+
+```json
+{
+  "message": {
+    "headers": [
+      {
+        "name": "From",
+        "value": "\"support@paypal.com\" <noreply@paypal-secure.test>"
+      },
+      { "name": "Reply-To", "value": "helpdesk@gmail.com" }
+    ],
+    "subject": "Your account is limited",
+    "html": "<p>Confirm now: <a href=\"https://login.lookalike.test/verify\">www.paypal.com</a></p>"
+  }
+}
+```
+
+```json
+{
+  "verdict": "suspicious",
+  "recommendedAction": "review",
+  "riskScore": 85,
+  "headline": "Review: The sender's domain imitates a well-known brand.",
+  "reasons": [
+    {
+      "code": "sender.brand_lookalike",
+      "severity": "high",
+      "summary": "The sender's domain imitates a well-known brand.",
+      "evidence": "paypal-secure[.]test pairs PayPal (paypal[.]com) with a word phishing uses"
+    },
+    {
+      "code": "headers.display_name_address",
+      "severity": "high",
+      "summary": "The display name shows one address while the message comes from another.",
+      "evidence": "support@paypal.com <noreply@paypal-secure.test>"
+    },
+    {
+      "code": "link.anchor_mismatch",
+      "severity": "high",
+      "summary": "A link shows one site and opens another.",
+      "evidence": "shows paypal.com opens login[.]lookalike[.]test"
+    },
+    {
+      "code": "headers.display_name_brand",
+      "severity": "medium",
+      "summary": "The display name claims a well-known brand while the message comes from another domain.",
+      "evidence": "PayPal claimed, From noreply@paypal-secure[.]test"
+    },
+    {
+      "code": "headers.reply_to_freemail",
+      "severity": "medium",
+      "summary": "Replies go to a free mail address while the message claims a company domain.",
+      "evidence": "From noreply@paypal-secure.test / Reply-To helpdesk@gmail.com"
+    },
+    {
+      "code": "sender.no_mail_authentication",
+      "severity": "low",
+      "summary": "The sender's domain publishes neither SPF nor DMARC: anyone can send as it.",
+      "evidence": "paypal-secure.test"
+    }
+  ],
+  "sender": {
+    "address": "noreply@paypal-secure.test",
+    "domain": "paypal-secure.test",
+    "displayName": "support@paypal.com",
+    "verdict": "unknown",
+    "replyTo": ["helpdesk@gmail.com"],
+    "posture": "F",
+    "spoofable": true
+  },
+  "authentication": {
+    "status": "unverified",
+    "hint": "No Authentication-Results header from a system you vouched for was read, so a message with nothing against it is inconclusive, never clean. Pass authservId (the id your receiving system writes in that header) or trustAuthenticationResults to let a DMARC pass count."
+  },
+  "links": {
+    "total": 1,
+    "flagged": [
+      {
+        "host": "login[.]lookalike[.]test",
+        "verdict": "unknown",
+        "flags": ["anchor_mismatch"],
+        "shownDomain": "paypal.com"
+      }
+    ]
+  },
+  "attachments": {
+    "total": 0,
+    "unknown": 0,
+    "flagged": []
+  },
+  "injection": {
+    "score": 0
+  },
+  "coverage": {
+    "skipped": [
+      {
+        "check": "authentication",
+        "reason": "no Authentication-Results header from a system you vouched for (context.authservId or trustAuthenticationResults); SPF, DKIM and DMARC are not verified by this scan yet"
+      },
+      {
+        "check": "connecting_ip",
+        "reason": "no public address in the Received chain at or below the trusted boundary"
+      }
+    ]
+  },
+  "meta": {
+    "apiLatencyMs": 2
+  }
+}
+```
+
+The verdict, the action, the score and the headline are the API's; the server
+only keeps the strongest six `reasons`, the links and attachments that carry a
+signal, and what was not checked, and writes hosts defanged (`evil[.]example`)
+so the text can be pasted into a ticket or a chat. `authentication.status` is
+`unverified` unless you name your receiving system (`authservId`, the id it
+writes in `Authentication-Results`) or vouch for every such header
+(`trustAuthenticationResults`): anyone can write one into a message, so
+nothing else is believed, and without it a message with nothing against it is
+`inconclusive`, never `clean`. Even with it, `clean` is kept for a sender domain
+the dataset knows as established (among the 100 000 most visited, not a free
+mailbox): attackers publish DMARC for the domains they register.
+`trustedHops` and `connectingIp` say which
+server delivered the message to yours. Sent as `eml`, attachments are also read
+for structure and never run (`attachments.flagged[].detectedType` and `flags`:
+a program under a document name, macros and remote templates in Office files,
+risky entries or a password in an archive, PDF actions, HTML that rebuilds a
+file), the addresses found inside them are looked up as links
+(`links.flagged[].origin: "attachment"`), and a message attached to it is read
+as a message of its own (`origin: "attached_message"`). Sent as `message`, an
+attachment is its digests and its name, and `coverage.skipped` says so. A
+message over 10 MiB is refused (send `message` with the attachments' digests
+instead). Each message costs one scan of the scan meter, not a request.
+
 ## Errors
 
 Every failure is a result with `isError: true` and this body:
@@ -326,8 +466,8 @@ whether no key is configured or the configured one was refused.
 ## Timeouts and cancellation
 
 Gate tools 15 s, `check_indicator` 25 s, CVE tools 10 s, `search_indicators`
-20 s, `check_indicators` 60 s, `check_password_exposure` 10 s, `bootstrap_key`
-15 s. `ISMALICIOUS_TIMEOUT_MS`
+20 s, `check_indicators` 60 s, `check_password_exposure` 10 s, `scan_email`
+20 s, `bootstrap_key` 15 s. `ISMALICIOUS_TIMEOUT_MS`
 replaces all of them; `ISMALICIOUS_TIMEOUT_<TOOL>_MS` (for example
 `ISMALICIOUS_TIMEOUT_CHECK_INDICATOR_MS=3000`) sets one tool's and wins. A
 `notifications/cancelled` from the client aborts the HTTP call; the cancelled
@@ -361,8 +501,8 @@ What the server itself does to answer sooner:
   `search_indicators`). A result that lists pending facets is never
   replayed: the re-check it invites goes to the API. A
   replay costs no request and says so (`meta.cached`, `meta.ageSec`, or a
-  top-level `_cache`). `scan_before_use`, `bootstrap_key` and errors are never
-  cached. `ISMALICIOUS_CACHE_TTL_S` caps or (with `0`) disables it.
+  top-level `_cache`). `scan_before_use`, `scan_email`, `bootstrap_key` and
+  errors are never cached. `ISMALICIOUS_CACHE_TTL_S` caps or (with `0`) disables it.
 - **Shared calls**: identical calls in flight share one request, a result
   with pending facets included. A defanged and a plain form of one indicator
   are one call; each caller still gets its own `input`.
@@ -402,15 +542,18 @@ of this session.
 ## Development
 
 ```bash
-npm install
-npm run typecheck && npm test && npm run build
-node scripts/check-version.mjs   # versions and server.json shape
-node scripts/smoke.mjs           # stdio end-to-end against a stub API
+npm ci --ignore-scripts
+npm run typecheck
+npm test
+npm run build
+npm run check-version
+npm run smoke
 ```
 
-The version is declared once in `src/version.ts`; `CHANGELOG.md` lists what changed.
-This repository mirrors `packages/mcp-server` from the isMalicious monorepo, where
-releases to npm and the MCP registry are cut. Issues and pull requests are welcome here.
+Use Node 24 for development; the packaged server runs on Node 18 or newer.
+The version is declared in `src/version.ts`. See `PUBLISHING.md` for the
+prepared public-source provenance release workflow and its pending owner
+approvals. A prepared workflow does not attest earlier npm releases.
 
 The `Dockerfile` is the build Glama runs to list the server. It sets a
 placeholder key pair so `tools/list` shows every tool; pass a real pair with
